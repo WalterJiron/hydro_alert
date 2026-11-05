@@ -33,8 +33,7 @@ class ApiEndpoints {
   static const double usgsMinLongitude = -87.7;
   static const double usgsMaxLongitude = -82.5;
 
-  static const String openStreetMapCopyright =
-      'https://www.openstreetmap.org/copyright';
+  static const String openStreetMapCopyright = 'https://www.openstreetmap.org/copyright';
   static const String usgsEarthquakeSite = 'https://earthquake.usgs.gov';
   static const String rainViewerSite = 'https://www.rainviewer.com';
 }
