@@ -26,7 +26,7 @@ class HomeWeatherSection extends ConsumerWidget {
         title: 'Clima no disponible',
         message:
             'La información meteorológica se activará cuando se configure '
-            'la clave de OpenWeatherMap en esta compilación.',
+            'la clave de WeatherAPI en esta compilación.',
       );
     }
 
@@ -40,7 +40,7 @@ class HomeWeatherSection extends ConsumerWidget {
           title: 'Clima no disponible',
           message: error is ConfigurationFailure
               ? 'La información meteorológica se activará cuando se configure '
-                    'la clave de OpenWeatherMap en esta compilación.'
+                    'la clave de WeatherAPI en esta compilación.'
               : errorMessageOf(error),
           onRetry: error is ConfigurationFailure
               ? null

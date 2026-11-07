@@ -15,6 +15,10 @@ final usgsDioProvider = Provider<Dio>((ref) {
   return ApiClient.create(baseUrl: '${ApiEndpoints.usgsBaseUrl}/');
 });
 
+final weatherApiDioProvider = Provider<Dio>((ref) {
+  return ApiClient.create(baseUrl: '${ApiEndpoints.weatherApiBaseUrl}/');
+});
+
 final openWeatherDioProvider = Provider<Dio>((ref) {
   return ApiClient.create(baseUrl: '${ApiEndpoints.openWeatherBaseUrl}/');
 });

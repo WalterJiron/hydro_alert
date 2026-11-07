@@ -63,7 +63,7 @@ class WeatherSnapshotCard extends StatelessWidget {
                 ),
               ),
               AlertBadge(
-                label: 'OpenWeather',
+                label: 'WeatherAPI',
                 tone: AppBadgeTone.info,
                 icon: LucideIcons.cloudSun,
               ),

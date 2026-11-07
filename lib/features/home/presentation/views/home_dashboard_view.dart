@@ -77,7 +77,7 @@ class HomeDashboardView extends ConsumerWidget {
             const SizedBox(height: 24),
             const SectionHeader(
               title: 'Clima actual',
-              subtitle: 'Datos de OpenWeatherMap para Managua',
+              subtitle: 'Datos de WeatherAPI para Managua',
             ),
             const SizedBox(height: 10),
             HomeWeatherSection(weather: weather),

@@ -35,13 +35,13 @@ class WeatherAlertsTab extends ConsumerWidget {
               title: 'Clima no configurado',
               message:
                   'La información meteorológica se activará cuando se configure '
-                  'la clave de OpenWeatherMap en esta compilación.',
+                  'la clave de WeatherAPI en esta compilación.',
             )
           else
             const InfoBanner(
               icon: LucideIcons.info,
               message:
-                  'Los avisos meteorológicos provienen de OpenWeatherMap y no '
+                  'Los avisos meteorológicos provienen de WeatherAPI y no '
                   'sustituyen la información oficial de SINAPRED o INETER.',
             ),
           const SizedBox(height: 16),
@@ -50,7 +50,7 @@ class WeatherAlertsTab extends ConsumerWidget {
               icon: LucideIcons.cloudSun,
               title: 'Información no disponible',
               message:
-                  'Configura OpenWeatherMap para consultar el clima y sus avisos.',
+                  'Configura WeatherAPI para consultar el clima y sus avisos.',
             )
           else
             ...weather.when(
@@ -67,7 +67,7 @@ class WeatherAlertsTab extends ConsumerWidget {
                       icon: LucideIcons.cloudSun,
                       title: 'Información no disponible',
                       message:
-                          'Configura OpenWeatherMap para consultar el clima y sus avisos.',
+                          'Configura WeatherAPI para consultar el clima y sus avisos.',
                     ),
                   ];
                 }
@@ -115,7 +115,7 @@ class WeatherAlertsTab extends ConsumerWidget {
             icon: LucideIcons.cloudSun,
             title: 'Sin avisos activos',
             message:
-                'OpenWeatherMap no reporta avisos meteorológicos para esta ubicación.',
+                'WeatherAPI no reporta avisos meteorológicos para esta ubicación.',
           ),
         )
       else

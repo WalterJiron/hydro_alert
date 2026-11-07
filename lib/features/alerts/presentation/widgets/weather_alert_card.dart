@@ -8,7 +8,7 @@ import '../../../../shared/atoms/alert_badge.dart';
 import '../../../../shared/molecules/app_card.dart';
 import '../../domain/entities/weather_alert.dart';
 
-/// Card for a single OpenWeatherMap alert.
+/// Card for a single weather alert.
 class WeatherAlertCard extends StatelessWidget {
   const WeatherAlertCard({super.key, required this.alert});
 

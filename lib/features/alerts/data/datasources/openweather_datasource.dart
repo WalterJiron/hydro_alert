@@ -7,17 +7,19 @@ import '../../../../core/network/api_client.dart';
 import '../../domain/entities/weather_alert.dart';
 import '../../domain/entities/weather_snapshot.dart';
 import '../models/weather_model.dart';
+import 'weather_data_source.dart';
 
-class OpenWeatherDataSource {
+class OpenWeatherDataSource implements WeatherDataSource {
   const OpenWeatherDataSource(this._dio);
 
   final Dio _dio;
 
+  @override
   Future<WeatherSnapshot> fetchCurrentWeather({
     double latitude = AppConfig.defaultLatitude,
     double longitude = AppConfig.defaultLongitude,
   }) async {
-    if (!AppConfig.hasWeather) {
+    if (!AppConfig.hasOpenWeather) {
       throw const ConfigurationFailure(
         message: 'La información meteorológica todavía no está configurada.',
       );
