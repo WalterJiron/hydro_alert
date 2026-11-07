@@ -10,6 +10,7 @@ import '../../../../shared/atoms/app_logo.dart';
 import '../../../../shared/atoms/custom_button.dart';
 import '../../../../shared/molecules/info_banner.dart';
 import '../viewmodels/auth_viewmodel.dart';
+import '../widgets/welcome_feature.dart';
 
 class WelcomeView extends ConsumerWidget {
   const WelcomeView({super.key});
@@ -50,21 +51,21 @@ class WelcomeView extends ConsumerWidget {
                       style: AppTypography.bodyLarge,
                     ),
                     const SizedBox(height: 28),
-                    const _Feature(
+                    const WelcomeFeature(
                       icon: LucideIcons.activity,
                       title: 'Actividad sísmica',
                       description:
                           'Eventos recientes del Servicio Geológico de EE. UU. (USGS).',
                     ),
                     const SizedBox(height: 16),
-                    const _Feature(
+                    const WelcomeFeature(
                       icon: LucideIcons.map,
                       title: 'Mapa y radar',
                       description:
                           'Ubicaciones, reportes de la comunidad y capa de lluvia opcional.',
                     ),
                     const SizedBox(height: 16),
-                    const _Feature(
+                    const WelcomeFeature(
                       icon: LucideIcons.users,
                       title: 'Reportes comunitarios',
                       description:
@@ -120,47 +121,6 @@ class WelcomeView extends ConsumerWidget {
           },
         ),
       ),
-    );
-  }
-}
-
-class _Feature extends StatelessWidget {
-  const _Feature({
-    required this.icon,
-    required this.title,
-    required this.description,
-  });
-
-  final IconData icon;
-  final String title;
-  final String description;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: AppColors.primarySoft,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, size: 21, color: AppColors.primary),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: AppTypography.titleSmall),
-              const SizedBox(height: 2),
-              Text(description, style: AppTypography.bodySmall),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
