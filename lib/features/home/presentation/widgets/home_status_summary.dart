@@ -5,6 +5,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/atoms/status_indicator.dart';
 import '../../../../shared/molecules/app_card.dart';
+import '../../../../shared/motion/app_animated_text.dart';
 import '../../../alerts/domain/entities/seismic_event.dart';
 import '../../../alerts/domain/entities/weather_snapshot.dart';
 
@@ -102,8 +103,8 @@ class _Stat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          value,
+        AppAnimatedText(
+          text: value,
           style: AppTypography.headlineMedium.copyWith(
             color: color,
             fontWeight: FontWeight.w800,
@@ -117,7 +118,7 @@ class _Stat extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        Text(hint, style: AppTypography.labelSmall),
+        AppAnimatedText(text: hint, style: AppTypography.labelSmall),
       ],
     );
   }

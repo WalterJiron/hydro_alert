@@ -7,6 +7,7 @@ import '../../../../core/utils/error_text.dart';
 import '../../../../shared/atoms/alert_badge.dart';
 import '../../../../shared/feedback/state_views.dart';
 import '../../../../shared/molecules/info_banner.dart';
+import '../../../../shared/motion/app_animated_entrance.dart';
 import '../viewmodels/alerts_viewmodel.dart';
 import '../widgets/seismic_event_card.dart';
 import '../widgets/seismic_event_sheet.dart';
@@ -25,13 +26,16 @@ class SeismicAlertsTab extends ConsumerWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
-          const InfoBanner(
-            icon: LucideIcons.shieldAlert,
-            tone: InfoBannerTone.warning,
-            title: 'Eventos de USGS',
-            message:
-                'Son registros sísmicos públicos, no alertas oficiales de evacuación. '
-                'Sigue las indicaciones de SINAPRED y las autoridades locales.',
+          const AppAnimatedEntrance(
+            order: 0,
+            child: InfoBanner(
+              icon: LucideIcons.shieldAlert,
+              tone: InfoBannerTone.warning,
+              title: 'Eventos de USGS',
+              message:
+                  'Son registros sísmicos públicos, no alertas oficiales de evacuación. '
+                  'Sigue las indicaciones de SINAPRED y las autoridades locales.',
+            ),
           ),
           const SizedBox(height: 16),
           ...alerts.when(
@@ -67,29 +71,36 @@ class SeismicAlertsTab extends ConsumerWidget {
               }
 
               return [
-                Row(
-                  children: [
-                    Text(
-                      '${events.length} eventos',
-                      style: AppTypography.titleSmall,
-                    ),
-                    const SizedBox(width: 8),
-                    const AlertBadge(
-                      label: 'USGS',
-                      tone: AppBadgeTone.info,
-                      icon: LucideIcons.activity,
-                    ),
-                    const Spacer(),
-                    Text('Últimos 30 días', style: AppTypography.labelSmall),
-                  ],
+                AppAnimatedEntrance(
+                  order: 1,
+                  child: Row(
+                    children: [
+                      Text(
+                        '${events.length} eventos',
+                        style: AppTypography.titleSmall,
+                      ),
+                      const SizedBox(width: 8),
+                      const AlertBadge(
+                        label: 'USGS',
+                        tone: AppBadgeTone.info,
+                        icon: LucideIcons.activity,
+                      ),
+                      const Spacer(),
+                      Text('Últimos 30 días', style: AppTypography.labelSmall),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 10),
                 for (var index = 0; index < events.length; index++) ...[
                   if (index > 0) const SizedBox(height: 10),
-                  SeismicEventCard(
-                    event: events[index],
-                    showDetails: true,
-                    onTap: () => showSeismicEventSheet(context, events[index]),
+                  AppAnimatedEntrance(
+                    order: index + 2,
+                    child: SeismicEventCard(
+                      event: events[index],
+                      showDetails: true,
+                      onTap: () =>
+                          showSeismicEventSheet(context, events[index]),
+                    ),
                   ),
                 ],
               ];

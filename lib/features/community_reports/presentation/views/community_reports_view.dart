@@ -8,6 +8,7 @@ import '../../../../core/utils/error_text.dart';
 import '../../../../shared/feedback/state_views.dart';
 import '../../../../shared/molecules/info_banner.dart';
 import '../../../../shared/molecules/section_header.dart';
+import '../../../../shared/motion/app_animated_entrance.dart';
 import '../viewmodels/community_reports_viewmodel.dart';
 import '../widgets/community_report_card.dart';
 import '../widgets/community_report_cta.dart';
@@ -48,41 +49,53 @@ class CommunityReportsView extends ConsumerWidget {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
-            const InfoBanner(
-              icon: LucideIcons.users,
-              tone: InfoBannerTone.warning,
-              title: 'Información no verificada',
-              message:
-                  'Los reportes son enviados por la comunidad. HydroAlert no ha '
-                  'confirmado su exactitud. Úsalos como referencia, no como una alerta oficial.',
+            const AppAnimatedEntrance(
+              order: 0,
+              child: InfoBanner(
+                icon: LucideIcons.users,
+                tone: InfoBannerTone.warning,
+                title: 'Información no verificada',
+                message:
+                    'Los reportes son enviados por la comunidad. HydroAlert no ha '
+                    'confirmado su exactitud. Úsalos como referencia, no como una alerta oficial.',
+              ),
             ),
             if (!AppConfig.hasBackend) ...[
               const SizedBox(height: 12),
-              const InfoBanner(
-                icon: LucideIcons.serverCrash,
-                title: 'Servicio no configurado',
-                message:
-                    'El envío y la consulta de reportes se activarán cuando se '
-                    'configure la URL del backend de HydroAlert.',
+              const AppAnimatedEntrance(
+                order: 1,
+                child: InfoBanner(
+                  icon: LucideIcons.serverCrash,
+                  title: 'Servicio no configurado',
+                  message:
+                      'El envío y la consulta de reportes se activarán cuando se '
+                      'configure la URL del backend de HydroAlert.',
+                ),
               ),
             ],
             const SizedBox(height: 16),
-            CommunityReportCta(
-              enabled: AppConfig.hasBackend,
-              onTap: () => context.push('/reportes/nuevo'),
+            AppAnimatedEntrance(
+              order: 2,
+              child: CommunityReportCta(
+                enabled: AppConfig.hasBackend,
+                onTap: () => context.push('/reportes/nuevo'),
+              ),
             ),
             const SizedBox(height: 24),
-            SectionHeader(
-              title: 'Reportes activos',
-              subtitle: AppConfig.hasBackend
-                  ? 'Ordenados del más reciente al más antiguo'
-                  : 'Sin conexión con el servicio de reportes',
-              actionLabel: AppConfig.hasBackend ? 'Actualizar' : null,
-              onAction: AppConfig.hasBackend
-                  ? () => ref
-                        .read(communityReportsViewModelProvider.notifier)
-                        .refresh()
-                  : null,
+            AppAnimatedEntrance(
+              order: 3,
+              child: SectionHeader(
+                title: 'Reportes activos',
+                subtitle: AppConfig.hasBackend
+                    ? 'Ordenados del más reciente al más antiguo'
+                    : 'Sin conexión con el servicio de reportes',
+                actionLabel: AppConfig.hasBackend ? 'Actualizar' : null,
+                onAction: AppConfig.hasBackend
+                    ? () => ref
+                          .read(communityReportsViewModelProvider.notifier)
+                          .refresh()
+                    : null,
+              ),
             ),
             const SizedBox(height: 10),
             if (!AppConfig.hasBackend)
@@ -126,10 +139,13 @@ class CommunityReportsView extends ConsumerWidget {
                   return [
                     for (var index = 0; index < items.length; index++) ...[
                       if (index > 0) const SizedBox(height: 10),
-                      CommunityReportCard(
-                        report: items[index],
-                        onTap: () =>
-                            showCommunityReportSheet(context, items[index]),
+                      AppAnimatedEntrance(
+                        order: index + 4,
+                        child: CommunityReportCard(
+                          report: items[index],
+                          onTap: () =>
+                              showCommunityReportSheet(context, items[index]),
+                        ),
                       ),
                     ],
                   ];

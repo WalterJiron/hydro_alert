@@ -10,6 +10,7 @@ import '../../../../shared/atoms/alert_badge.dart';
 import '../../../../shared/feedback/state_views.dart';
 import '../../../../shared/molecules/app_card.dart';
 import '../../../../shared/molecules/info_banner.dart';
+import '../../../../shared/motion/app_animated_entrance.dart';
 import '../../domain/entities/weather_snapshot.dart';
 import '../viewmodels/weather_viewmodel.dart';
 import '../widgets/weather_alert_card.dart';
@@ -30,19 +31,25 @@ class WeatherAlertsTab extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
           if (!AppConfig.hasWeather)
-            const InfoBanner(
-              icon: LucideIcons.cloudSun,
-              title: 'Clima no configurado',
-              message:
-                  'La información meteorológica se activará cuando se configure '
-                  'la clave de WeatherAPI en esta compilación.',
+            const AppAnimatedEntrance(
+              order: 0,
+              child: InfoBanner(
+                icon: LucideIcons.cloudSun,
+                title: 'Clima no configurado',
+                message:
+                    'La información meteorológica se activará cuando se configure '
+                    'la clave de WeatherAPI en esta compilación.',
+              ),
             )
           else
-            const InfoBanner(
-              icon: LucideIcons.info,
-              message:
-                  'Los avisos meteorológicos provienen de WeatherAPI y no '
-                  'sustituyen la información oficial de SINAPRED o INETER.',
+            const AppAnimatedEntrance(
+              order: 0,
+              child: InfoBanner(
+                icon: LucideIcons.info,
+                message:
+                    'Los avisos meteorológicos provienen de WeatherAPI y no '
+                    'sustituyen la información oficial de SINAPRED o INETER.',
+              ),
             ),
           const SizedBox(height: 16),
           if (!AppConfig.hasWeather)
@@ -94,34 +101,47 @@ class WeatherAlertsTab extends ConsumerWidget {
       ..sort((a, b) => b.start.compareTo(a.start));
 
     return [
-      WeatherSnapshotCard(snapshot: snapshot),
+      AppAnimatedEntrance(
+        order: 1,
+        child: WeatherSnapshotCard(snapshot: snapshot),
+      ),
       const SizedBox(height: 20),
-      Row(
-        children: [
-          Text('Avisos meteorológicos', style: AppTypography.titleSmall),
-          const Spacer(),
-          AlertBadge(
-            label: '${alerts.where((alert) => alert.isActive).length} activos',
-            tone: alerts.any((alert) => alert.isActive)
-                ? AppBadgeTone.warning
-                : AppBadgeTone.neutral,
-          ),
-        ],
+      AppAnimatedEntrance(
+        order: 2,
+        child: Row(
+          children: [
+            Text('Avisos meteorológicos', style: AppTypography.titleSmall),
+            const Spacer(),
+            AlertBadge(
+              label:
+                  '${alerts.where((alert) => alert.isActive).length} activos',
+              tone: alerts.any((alert) => alert.isActive)
+                  ? AppBadgeTone.warning
+                  : AppBadgeTone.neutral,
+            ),
+          ],
+        ),
       ),
       const SizedBox(height: 10),
       if (alerts.isEmpty)
-        const AppCard(
-          child: EmptyState(
-            icon: LucideIcons.cloudSun,
-            title: 'Sin avisos activos',
-            message:
-                'WeatherAPI no reporta avisos meteorológicos para esta ubicación.',
+        const AppAnimatedEntrance(
+          order: 3,
+          child: AppCard(
+            child: EmptyState(
+              icon: LucideIcons.cloudSun,
+              title: 'Sin avisos activos',
+              message:
+                  'WeatherAPI no reporta avisos meteorológicos para esta ubicación.',
+            ),
           ),
         )
       else
         for (var index = 0; index < alerts.length; index++) ...[
           if (index > 0) const SizedBox(height: 10),
-          WeatherAlertCard(alert: alerts[index]),
+          AppAnimatedEntrance(
+            order: index + 3,
+            child: WeatherAlertCard(alert: alerts[index]),
+          ),
         ],
     ];
   }

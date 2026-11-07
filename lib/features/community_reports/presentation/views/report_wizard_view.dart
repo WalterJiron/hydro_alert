@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/config/app_config.dart';
 import '../../../../shared/molecules/info_banner.dart';
+import '../../../../shared/motion/app_animated_switcher.dart';
 import '../services/report_photo_picker.dart';
 import '../viewmodels/report_wizard_state.dart';
 import '../viewmodels/report_wizard_viewmodel.dart';
@@ -64,52 +65,56 @@ class _ReportWizardViewState extends ConsumerState<ReportWizardView> {
                   child: ReportWizardStepBar(step: state.step),
                 ),
         ),
-        body: state.submitted
-            ? ReportSuccessView(
-                onDone: () {
-                  viewModel.reset();
-                  context.go('/reportes');
-                },
-                onCreateAnother: () {
-                  viewModel.reset();
-                  _descriptionController.clear();
-                  setState(() => _photoError = null);
-                },
-              )
-            : ListView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
-                children: [
-                  if (!AppConfig.hasBackend) ...[
-                    const InfoBanner(
-                      icon: LucideIcons.serverCrash,
-                      title: 'Servicio no configurado',
-                      message:
-                          'Podrás enviar el reporte cuando se configure la URL '
-                          'del backend de HydroAlert.',
-                    ),
-                    const SizedBox(height: 12),
+        body: AppAnimatedSwitcher(
+          child: state.submitted
+              ? ReportSuccessView(
+                  key: const ValueKey('report-success'),
+                  onDone: () {
+                    viewModel.reset();
+                    context.go('/reportes');
+                  },
+                  onCreateAnother: () {
+                    viewModel.reset();
+                    _descriptionController.clear();
+                    setState(() => _photoError = null);
+                  },
+                )
+              : ListView(
+                  key: ValueKey('report-step-${state.step.name}'),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+                  children: [
+                    if (!AppConfig.hasBackend) ...[
+                      const InfoBanner(
+                        icon: LucideIcons.serverCrash,
+                        title: 'Servicio no configurado',
+                        message:
+                            'Podrás enviar el reporte cuando se configure la URL '
+                            'del backend de HydroAlert.',
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    if (state.step == ReportWizardStep.category)
+                      ReportCategoryStep(
+                        state: state,
+                        descriptionController: _descriptionController,
+                        onSelectCategory: viewModel.selectCategory,
+                        onDescriptionChanged: viewModel.updateDescription,
+                        onContinue: viewModel.goToEvidence,
+                      )
+                    else
+                      ReportEvidenceStep(
+                        state: state,
+                        photoError: _photoError,
+                        onLocate: viewModel.locateUser,
+                        onPickCamera: _pickFromCamera,
+                        onPickGallery: _pickFromGallery,
+                        onRemovePhoto: viewModel.removePhoto,
+                        onBack: viewModel.goBack,
+                        onSubmit: viewModel.submit,
+                      ),
                   ],
-                  if (state.step == ReportWizardStep.category)
-                    ReportCategoryStep(
-                      state: state,
-                      descriptionController: _descriptionController,
-                      onSelectCategory: viewModel.selectCategory,
-                      onDescriptionChanged: viewModel.updateDescription,
-                      onContinue: viewModel.goToEvidence,
-                    )
-                  else
-                    ReportEvidenceStep(
-                      state: state,
-                      photoError: _photoError,
-                      onLocate: viewModel.locateUser,
-                      onPickCamera: _pickFromCamera,
-                      onPickGallery: _pickFromGallery,
-                      onRemovePhoto: viewModel.removePhoto,
-                      onBack: viewModel.goBack,
-                      onSubmit: viewModel.submit,
-                    ),
-                ],
-              ),
+                ),
+        ),
       ),
     );
   }

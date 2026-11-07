@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../shared/motion/app_motion.dart';
 import '../viewmodels/report_wizard_state.dart';
 
 /// Two-step progress indicator shown in the wizard app bar.
@@ -61,7 +62,9 @@ class _StepSegment extends StatelessWidget {
         : AppColors.textMuted;
 
     return Expanded(
-      child: Container(
+      child: AnimatedContainer(
+        duration: AppMotion.resolve(context, AppMotion.quick),
+        curve: AppMotion.curve,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         decoration: BoxDecoration(
           color: isActive ? AppColors.primarySoft : AppColors.surface,
@@ -72,7 +75,9 @@ class _StepSegment extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Container(
+            AnimatedContainer(
+              duration: AppMotion.resolve(context, AppMotion.quick),
+              curve: AppMotion.curve,
               width: 20,
               height: 20,
               alignment: Alignment.center,
