@@ -4,19 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/config/app_config.dart';
-import '../../../../app/theme/app_colors.dart';
-import '../../../../app/theme/app_typography.dart';
-import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/utils/error_text.dart';
-import '../../../../shared/atoms/alert_badge.dart';
 import '../../../../shared/feedback/state_views.dart';
-import '../../../../shared/molecules/app_card.dart';
 import '../../../../shared/molecules/info_banner.dart';
 import '../../../../shared/molecules/section_header.dart';
-import '../../domain/entities/community_report.dart';
 import '../viewmodels/community_reports_viewmodel.dart';
 import '../widgets/community_report_card.dart';
-import '../widgets/report_category_visuals.dart';
+import '../widgets/community_report_cta.dart';
+import '../widgets/community_report_sheet.dart';
 
 class CommunityReportsView extends ConsumerWidget {
   const CommunityReportsView({super.key});
@@ -72,7 +67,7 @@ class CommunityReportsView extends ConsumerWidget {
               ),
             ],
             const SizedBox(height: 16),
-            _ReportCta(
+            CommunityReportCta(
               enabled: AppConfig.hasBackend,
               onTap: () => context.push('/reportes/nuevo'),
             ),
@@ -133,7 +128,8 @@ class CommunityReportsView extends ConsumerWidget {
                       if (index > 0) const SizedBox(height: 10),
                       CommunityReportCard(
                         report: items[index],
-                        onTap: () => _showReportSheet(context, items[index]),
+                        onTap: () =>
+                            showCommunityReportSheet(context, items[index]),
                       ),
                     ],
                   ];
@@ -141,176 +137,6 @@ class CommunityReportsView extends ConsumerWidget {
               ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showReportSheet(BuildContext context, CommunityReport report) {
-    final color = reportCategoryColor(report.category);
-
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (sheetContext) {
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        reportCategoryIcon(report.category),
-                        size: 20,
-                        color: color,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        report.category.label,
-                        style: AppTypography.titleMedium,
-                      ),
-                    ),
-                    const AlertBadge(
-                      label: 'Sin verificar',
-                      tone: AppBadgeTone.warning,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                Text(report.description, style: AppTypography.bodyLarge),
-                const SizedBox(height: 16),
-                _SheetRow(
-                  icon: LucideIcons.clock,
-                  label: 'Reportado',
-                  value: DateFormatter.dateTime(report.createdAt),
-                ),
-                _SheetRow(
-                  icon: LucideIcons.mapPin,
-                  label: 'Ubicación',
-                  value: report.coordinatesLabel,
-                ),
-                _SheetRow(
-                  icon: LucideIcons.users,
-                  label: 'Origen',
-                  value: 'Comunidad',
-                ),
-                const SizedBox(height: 16),
-                const InfoBanner(
-                  icon: LucideIcons.shieldAlert,
-                  tone: InfoBannerTone.warning,
-                  message:
-                      'Este reporte no ha sido verificado por HydroAlert ni por una autoridad.',
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _ReportCta extends StatelessWidget {
-  const _ReportCta({required this.enabled, required this.onTap});
-
-  final bool enabled;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      backgroundColor: AppColors.primarySoft,
-      borderColor: AppColors.primary.withValues(alpha: 0.18),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(LucideIcons.plus, color: Colors.white, size: 24),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '¿Viste una situación de riesgo?',
-                  style: AppTypography.titleSmall,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  enabled
-                      ? 'Comparte una foto, una descripción y la ubicación.'
-                      : 'El servicio de reportes no está configurado todavía.',
-                  style: AppTypography.bodySmall,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            onPressed: enabled ? onTap : null,
-            tooltip: 'Crear reporte',
-            style: IconButton.styleFrom(
-              backgroundColor: enabled ? AppColors.primary : AppColors.surface,
-              foregroundColor: enabled ? Colors.white : AppColors.textMuted,
-            ),
-            icon: const Icon(LucideIcons.arrowRight, size: 20),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SheetRow extends StatelessWidget {
-  const _SheetRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: AppColors.textMuted),
-          const SizedBox(width: 8),
-          SizedBox(
-            width: 84,
-            child: Text(label, style: AppTypography.bodySmall),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: AppTypography.titleSmall,
-              textAlign: TextAlign.right,
-            ),
-          ),
-        ],
       ),
     );
   }
