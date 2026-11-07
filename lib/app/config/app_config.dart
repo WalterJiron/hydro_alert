@@ -19,21 +19,6 @@ class AppConfig {
     defaultValue: '',
   );
 
-  static const String mapTileUrl = String.fromEnvironment(
-    'MAP_TILE_URL',
-    defaultValue: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-  );
-
-  static const String mapTileAttribution = String.fromEnvironment(
-    'MAP_TILE_ATTRIBUTION',
-    defaultValue: '© OpenStreetMap contributors',
-  );
-
-  static const String mapUserAgent = String.fromEnvironment(
-    'MAP_USER_AGENT',
-    defaultValue: 'ni.hydroalert.app',
-  );
-
   static const bool firebaseEnabled = bool.fromEnvironment(
     'FIREBASE_ENABLED',
     defaultValue: false,
