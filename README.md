@@ -9,7 +9,7 @@
 | Pestaña | Qué hace |
 | --- | --- |
 | **Inicio** | Resumen del día, clima actual, últimos sismos, reportes recientes y acceso rápido a la guía de emergencia. |
-| **Mapa** | OpenStreetMap con marcadores de sismos y reportes, ubicación del usuario y radar RainViewer opcional. |
+| **Mapa** | Google Maps con marcadores personalizados de sismos y reportes, ubicación del usuario y radar RainViewer opcional. |
 | **Reportes** | Lista de reportes comunitarios activos y asistente de dos pasos para crear uno con foto y ubicación. |
 | **Alertas** | Pestañas de sismos USGS y avisos meteorológicos OpenWeatherMap con detalle y enlace a la fuente. |
 | **Emergencia** | Guía visual de actuación y modo SOS visual a pantalla completa. No llama, no envía ubicación y no despacha ayuda. |
@@ -22,7 +22,7 @@ La app inicia con acceso como invitado. No hay credenciales de autenticación ni
 - Riverpod 3 (`Notifier` / `AsyncNotifier` + `riverpod_generator`).
 - Freezed 3 y `json_serializable`.
 - `go_router` con `StatefulShellRoute` de cinco ramas.
-- `flutter_map` + OpenStreetMap + RainViewer.
+- `google_maps_flutter` + Google Maps + RainViewer.
 - Dio para USGS, OpenWeatherMap y el backend NestJS.
 - Firebase Core / Messaging **opcional**.
 - `image_picker` para cámara/galería y `geolocator` para ubicación bajo demanda.
@@ -79,9 +79,8 @@ Nunca se guardan secretos en el repositorio. Usa `--dart-define`:
 | `FIREBASE_ENABLED` | No | `true` activa Firebase Messaging. Por defecto `false`. |
 | `SOS_MAGNITUDE_THRESHOLD` | No | Magnitud mínima para el overlay crítico. Por defecto `5.0`. |
 | `SOS_EVENT_MAX_AGE_MINUTES` | No | Antigüedad máxima de un sismo para el overlay. Por defecto `15`. |
-| `MAP_TILE_URL` | No | Plantilla de teselas. Por defecto OpenStreetMap. |
-| `MAP_TILE_ATTRIBUTION` | No | Texto de atribución del mapa. |
-| `MAP_USER_AGENT` | No | User-Agent exigido por el proveedor de teselas. |
+
+Las claves nativas de Google Maps no se pasan por `--dart-define`. Se configuran una sola vez en cada plataforma (ver abajo).
 
 Ejemplo:
 
@@ -91,6 +90,31 @@ flutter run \
   --dart-define=API_BASE_URL=https://tu-backend.vercel.app/api/v1 \
   --dart-define=FIREBASE_ENABLED=false
 ```
+
+### Google Maps
+
+El mapa base usa el SDK nativo de Google Maps.
+
+**Android**
+
+1. Agrega la clave en `android/local.properties` (ignorado por git):
+
+   ```properties
+   GOOGLE_MAPS_API_KEY=tu_clave
+   ```
+
+2. `android/app/build.gradle.kts` la inyecta como `manifestPlaceholders["googleMapsApiKey"]` y `AndroidManifest.xml` la publica en `com.google.android.geo.API_KEY`.
+
+**iOS**
+
+`ios/Runner/AppDelegate.swift` llama a `GMSServices.provideAPIKey("...")` antes de inicializar Flutter. El proyecto requiere **iOS 14 o superior** por el SDK de Google Maps.
+
+**Restricciones recomendadas en Google Cloud**
+
+- Habilitar **Maps SDK for Android** y **Maps SDK for iOS**.
+- Restringir la clave de Android al package `ni.hydroalert.app` y al SHA-1 del keystore usado para firmar.
+- Restringir la clave de iOS al bundle ID de la app.
+- Si el mapa aparece en blanco o gris, revisa `adb logcat`/Xcode en busca de `API key not valid` o restricciones de paquete/SHA-1.
 
 ## Fuentes de datos y límites
 
@@ -112,7 +136,8 @@ flutter run \
 
 - Metadatos: `https://api.rainviewer.com/public/weather-maps.json`.
 - Capa de radar opcional, activada manualmente por el usuario.
-- Se muestra atribución de OpenStreetMap y RainViewer.
+- RainViewer sirve teselas de radar hasta **zoom 7**; por encima, la app recorta y amplía la tesela padre de zoom 7 en lugar de pedir niveles inexistentes.
+- Se muestra atribución de Google Maps (logotipo del mapa) y RainViewer cuando la capa está activa. La leyenda incluye los créditos completos.
 
 ### Reportes comunitarios
 
