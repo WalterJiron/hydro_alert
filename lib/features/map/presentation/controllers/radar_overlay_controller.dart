@@ -17,7 +17,7 @@ class RadarOverlayController {
     return TileOverlay(
       tileOverlayId: const TileOverlayId('rainviewer-radar'),
       tileProvider: _provider!,
-      transparency: 0.38,
+      transparency: 0.2,
       fadeIn: true,
       zIndex: 1,
     );

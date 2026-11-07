@@ -52,6 +52,9 @@ class RainViewerDataSource {
           latest.time! * 1000,
           isUtc: true,
         ).toLocal(),
+        // RainViewer currently documents scheme 2 (Universal Blue) as the only
+        // public palette. Intense cells still render in yellow/red, and the
+        // overlay opacity is tuned so they remain visible over the light map.
         tileUrlTemplate: '$host$path/256/{z}/{x}/{y}/2/1_1.png',
       );
     } catch (error) {
