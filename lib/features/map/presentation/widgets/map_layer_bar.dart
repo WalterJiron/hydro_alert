@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/molecules/app_card.dart';
+import '../../../../shared/motion/app_motion.dart';
 
 /// Segmented layer switcher shown over the map.
 class MapLayerBar extends StatelessWidget {
@@ -118,78 +119,103 @@ class _LayerSegment extends StatelessWidget {
       selected: isSelected,
       enabled: isEnabled,
       label: label,
-      child: Opacity(
+      child: AnimatedOpacity(
         opacity: isEnabled ? 1 : 0.55,
-        child: Material(
-          color: isSelected
-              ? color.withValues(alpha: 0.12)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: isLoading ? null : onTap,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: isSelected
-                      ? color.withValues(alpha: 0.5)
-                      : AppColors.border,
+        duration: AppMotion.resolve(context, AppMotion.quick),
+        child: AnimatedContainer(
+          duration: AppMotion.resolve(context, AppMotion.quick),
+          curve: AppMotion.curve,
+          decoration: BoxDecoration(
+            color: isSelected
+                ? color.withValues(alpha: 0.12)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isSelected
+                  ? color.withValues(alpha: 0.5)
+                  : AppColors.border,
+            ),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: isLoading ? null : onTap,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 10,
                 ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (isLoading)
-                    SizedBox(
-                      width: 14,
-                      height: 14,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: effectiveForeground,
-                      ),
-                    )
-                  else
-                    Icon(icon, size: 16, color: effectiveForeground),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      label,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.labelSmall.copyWith(
-                        color: effectiveForeground,
-                        fontWeight: isSelected
-                            ? FontWeight.w800
-                            : FontWeight.w600,
-                      ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AnimatedSwitcher(
+                      duration: AppMotion.resolve(context, AppMotion.quick),
+                      switchInCurve: AppMotion.curve,
+                      child: isLoading
+                          ? SizedBox(
+                              key: const ValueKey('loading'),
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: effectiveForeground,
+                              ),
+                            )
+                          : Icon(
+                              icon,
+                              key: ValueKey(icon),
+                              size: 16,
+                              color: effectiveForeground,
+                            ),
                     ),
-                  ),
-                  if (count != null && count! > 0) ...[
-                    const SizedBox(width: 5),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 5,
-                        vertical: 1,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? color.withValues(alpha: 0.2)
-                            : AppColors.surfaceMuted,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
+                    const SizedBox(width: 6),
+                    Flexible(
                       child: Text(
-                        '$count',
-                        style: TextStyle(
-                          fontSize: 9.5,
-                          height: 1.2,
-                          fontWeight: FontWeight.w800,
-                          color: isSelected ? foreground : AppColors.textMuted,
+                        label,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: effectiveForeground,
+                          fontWeight: isSelected
+                              ? FontWeight.w800
+                              : FontWeight.w600,
                         ),
                       ),
                     ),
+                    if (count != null && count! > 0) ...[
+                      const SizedBox(width: 5),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5,
+                          vertical: 1,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? color.withValues(alpha: 0.2)
+                              : AppColors.surfaceMuted,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: AnimatedSwitcher(
+                          duration: AppMotion.resolve(context, AppMotion.quick),
+                          switchInCurve: AppMotion.curve,
+                          child: Text(
+                            '$count',
+                            key: ValueKey(count),
+                            style: TextStyle(
+                              fontSize: 9.5,
+                              height: 1.2,
+                              fontWeight: FontWeight.w800,
+                              color: isSelected
+                                  ? foreground
+                                  : AppColors.textMuted,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),

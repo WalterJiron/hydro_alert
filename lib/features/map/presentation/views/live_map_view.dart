@@ -8,6 +8,7 @@ import '../../../../app/constants/api_endpoints.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../../core/utils/external_link.dart';
 import '../../../../shared/molecules/info_banner.dart';
+import '../../../../shared/motion/app_animated_entrance.dart';
 import '../../../alerts/domain/entities/seismic_event.dart';
 import '../../../alerts/presentation/viewmodels/alerts_viewmodel.dart';
 import '../../../alerts/presentation/widgets/seismic_event_sheet.dart';
@@ -146,72 +147,96 @@ class _LiveMapViewState extends ConsumerState<LiveMapView> {
             bottom: false,
             child: Column(
               children: [
-                MapTopBar(
-                  alertsLoading: alerts.isLoading,
-                  alertsAvailable: alerts.hasValue,
-                  onOpenLegend: _openLegend,
+                AppAnimatedEntrance(
+                  order: 0,
+                  offset: const Offset(0, -0.12),
+                  child: MapTopBar(
+                    alertsLoading: alerts.isLoading,
+                    alertsAvailable: alerts.hasValue,
+                    onOpenLegend: _openLegend,
+                  ),
                 ),
                 const Spacer(),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: MapControls(
-                    isLocating: mapState.isLocating,
-                    onZoomIn: () => _zoomBy(1),
-                    onZoomOut: () => _zoomBy(-1),
-                    onLocate: _locateUser,
-                    onRefresh: _refreshData,
+                AppAnimatedEntrance(
+                  order: 1,
+                  offset: const Offset(0.12, 0),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: MapControls(
+                      isLocating: mapState.isLocating,
+                      onZoomIn: () => _zoomBy(1),
+                      onZoomOut: () => _zoomBy(-1),
+                      onLocate: _locateUser,
+                      onRefresh: _refreshData,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
                 if (mapState.radarError != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: InfoBanner(
-                      icon: LucideIcons.cloudOff,
-                      tone: InfoBannerTone.warning,
-                      message: mapState.radarError!,
+                  AppAnimatedEntrance(
+                    order: 2,
+                    offset: const Offset(0, 0.06),
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: InfoBanner(
+                        icon: LucideIcons.cloudOff,
+                        tone: InfoBannerTone.warning,
+                        message: mapState.radarError!,
+                      ),
                     ),
                   ),
                 if (_showLocationBanner(mapState))
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: MapLocationBanner(
-                      availability: mapState.locationAvailability!,
-                      onResolve: () => ref
-                          .read(mapViewModelProvider.notifier)
-                          .resolveLocationIssue(),
-                      onDismiss: () => ref
-                          .read(mapViewModelProvider.notifier)
-                          .dismissLocationBanner(),
+                  AppAnimatedEntrance(
+                    order: 2,
+                    offset: const Offset(0, 0.06),
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: MapLocationBanner(
+                        availability: mapState.locationAvailability!,
+                        onResolve: () => ref
+                            .read(mapViewModelProvider.notifier)
+                            .resolveLocationIssue(),
+                        onDismiss: () => ref
+                            .read(mapViewModelProvider.notifier)
+                            .dismissLocationBanner(),
+                      ),
                     ),
                   ),
                 if (mapState.hasRadar)
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: MapRadarAttribution(
-                      onRainViewer: () async {
-                        await openExternalUrl(ApiEndpoints.rainViewerSite);
-                      },
+                  AppAnimatedEntrance(
+                    order: 2,
+                    offset: const Offset(0.08, 0),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: MapRadarAttribution(
+                        onRainViewer: () async {
+                          await openExternalUrl(ApiEndpoints.rainViewerSite);
+                        },
+                      ),
                     ),
                   ),
                 const SizedBox(height: 5),
-                MapLayerBar(
-                  earthquakesSelected: mapState.showEarthquakes,
-                  reportsSelected: mapState.showReports,
-                  radarSelected: mapState.radarEnabled,
-                  radarLoading: mapState.isLoadingRadar,
-                  reportsEnabled: AppConfig.hasBackend,
-                  earthquakeCount: alerts.value?.length,
-                  reportCount: reports.value?.length,
-                  onToggleEarthquakes: () => ref
-                      .read(mapViewModelProvider.notifier)
-                      .toggleEarthquakes(),
-                  onToggleReports: AppConfig.hasBackend
-                      ? () => ref
-                            .read(mapViewModelProvider.notifier)
-                            .toggleReports()
-                      : null,
-                  onToggleRadar: _toggleRadar,
+                AppAnimatedEntrance(
+                  order: 3,
+                  offset: const Offset(0, 0.1),
+                  child: MapLayerBar(
+                    earthquakesSelected: mapState.showEarthquakes,
+                    reportsSelected: mapState.showReports,
+                    radarSelected: mapState.radarEnabled,
+                    radarLoading: mapState.isLoadingRadar,
+                    reportsEnabled: AppConfig.hasBackend,
+                    earthquakeCount: alerts.value?.length,
+                    reportCount: reports.value?.length,
+                    onToggleEarthquakes: () => ref
+                        .read(mapViewModelProvider.notifier)
+                        .toggleEarthquakes(),
+                    onToggleReports: AppConfig.hasBackend
+                        ? () => ref
+                              .read(mapViewModelProvider.notifier)
+                              .toggleReports()
+                        : null,
+                    onToggleRadar: _toggleRadar,
+                  ),
                 ),
               ],
             ),
