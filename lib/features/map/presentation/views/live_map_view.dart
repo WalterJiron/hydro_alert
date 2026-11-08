@@ -44,8 +44,13 @@ class LiveMapView extends ConsumerStatefulWidget {
 class _LiveMapViewState extends ConsumerState<LiveMapView>
     with SingleTickerProviderStateMixin {
   static const double _initialZoom = 7.1;
+  static const double _paddingTop = 60;
+  static const double _paddingBottom = 92;
   static const Duration _radarFrameDuration = Duration(milliseconds: 620);
 
+  // The viewport is the only source for the initial camera. Setting the
+  // camera again from `onMapCreated` races with the platform view's own
+  // sizing pass and can leave the map off-centre.
   static final CameraViewportState _initialViewport = CameraViewportState(
     center: Point(
       coordinates: Position(
@@ -54,11 +59,12 @@ class _LiveMapViewState extends ConsumerState<LiveMapView>
       ),
     ),
     zoom: _initialZoom,
+    padding: const EdgeInsets.only(top: _paddingTop, bottom: _paddingBottom),
   );
 
   static final MbxEdgeInsets _mapPadding = MbxEdgeInsets(
-    top: 60,
-    bottom: 92,
+    top: _paddingTop,
+    bottom: _paddingBottom,
     left: 0,
     right: 0,
   );
@@ -350,20 +356,6 @@ class _LiveMapViewState extends ConsumerState<LiveMapView>
           maxZoom: 16,
           minPitch: 0,
           maxPitch: 0,
-        ),
-      );
-      await map.setCamera(
-        CameraOptions(
-          center: Point(
-            coordinates: Position(
-              ApiEndpoints.nicaraguaCenterLongitude,
-              ApiEndpoints.nicaraguaCenterLatitude,
-            ),
-          ),
-          zoom: _initialZoom,
-          padding: _mapPadding,
-          bearing: 0,
-          pitch: 0,
         ),
       );
     } catch (_) {
