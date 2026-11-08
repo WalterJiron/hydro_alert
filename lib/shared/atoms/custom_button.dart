@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/theme/app_colors.dart';
+import '../motion/app_press_scale.dart';
 
 enum AppButtonVariant { primary, secondary, ghost, danger }
 
@@ -73,11 +74,17 @@ class CustomButton extends StatelessWidget {
       ),
     };
 
+    final scaled = AppPressScale(
+      enabled: effectiveOnPressed != null,
+      pressedScale: 0.98,
+      child: button,
+    );
+
     if (!expand) {
-      return button;
+      return scaled;
     }
 
-    return SizedBox(width: double.infinity, child: button);
+    return SizedBox(width: double.infinity, child: scaled);
   }
 }
 

@@ -15,6 +15,7 @@ class InfoBanner extends StatelessWidget {
     this.tone = InfoBannerTone.info,
     this.actionLabel,
     this.onAction,
+    this.onDismiss,
   });
 
   final String message;
@@ -23,6 +24,7 @@ class InfoBanner extends StatelessWidget {
   final InfoBannerTone tone;
   final String? actionLabel;
   final VoidCallback? onAction;
+  final VoidCallback? onDismiss;
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +86,21 @@ class InfoBanner extends StatelessWidget {
               ],
             ),
           ),
+          if (onDismiss != null) ...[
+            const SizedBox(width: 4),
+            IconButton(
+              onPressed: onDismiss,
+              tooltip: 'Cerrar aviso',
+              icon: const Icon(Icons.close_rounded, size: 18),
+              color: foreground.withValues(alpha: 0.8),
+              padding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
+              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+              style: IconButton.styleFrom(
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+          ],
         ],
       ),
     );

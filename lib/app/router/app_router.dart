@@ -13,6 +13,7 @@ import '../../shared/atoms/custom_button.dart';
 import '../../shared/organisms/app_shell.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
+import 'animated_branch_container.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
@@ -25,9 +26,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/bienvenida',
         builder: (context, state) => const WelcomeView(),
       ),
-      StatefulShellRoute.indexedStack(
+      StatefulShellRoute(
         builder: (context, state, navigationShell) {
           return AppShell(navigationShell: navigationShell);
+        },
+        navigatorContainerBuilder: (context, navigationShell, children) {
+          return AnimatedBranchContainer(
+            currentIndex: navigationShell.currentIndex,
+            children: children,
+          );
         },
         branches: [
           StatefulShellBranch(

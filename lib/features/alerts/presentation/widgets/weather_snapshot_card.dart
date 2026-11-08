@@ -4,8 +4,9 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/utils/date_formatter.dart';
-import '../../../../shared/atoms/alert_badge.dart';
 import '../../../../shared/molecules/app_card.dart';
+import '../../../../shared/motion/app_animated_entrance.dart';
+import '../../../../shared/motion/app_animated_text.dart';
 import '../../domain/entities/weather_snapshot.dart';
 import 'weather_visuals.dart';
 
@@ -27,17 +28,22 @@ class WeatherSnapshotCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(
-                  weatherIconFor(snapshot.weatherMain, snapshot.iconCode),
-                  color: color,
-                  size: 28,
+              AppAnimatedEntrance(
+                order: 0,
+                duration: const Duration(milliseconds: 220),
+                fromScale: 0.82,
+                child: Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    weatherIconFor(snapshot.weatherMain, snapshot.iconCode),
+                    color: color,
+                    size: 28,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -45,8 +51,8 @@ class WeatherSnapshotCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '${snapshot.temperatureC.round()}°C',
+                    AppAnimatedText(
+                      text: '${snapshot.temperatureC.round()}°C',
                       style: AppTypography.displayMedium.copyWith(
                         fontSize: 30,
                         height: 1,
@@ -61,11 +67,6 @@ class WeatherSnapshotCard extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-              AlertBadge(
-                label: 'OpenWeather',
-                tone: AppBadgeTone.info,
-                icon: LucideIcons.cloudSun,
               ),
             ],
           ),

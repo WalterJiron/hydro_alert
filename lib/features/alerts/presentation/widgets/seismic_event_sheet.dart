@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/utils/external_link.dart';
 import '../../../../shared/atoms/alert_badge.dart';
 import '../../../../shared/atoms/custom_button.dart';
 import '../../../../shared/molecules/info_banner.dart';
@@ -92,14 +92,7 @@ Future<void> showSeismicEventSheet(BuildContext context, SeismicEvent event) {
                   icon: LucideIcons.externalLink,
                   expand: true,
                   onPressed: () async {
-                    final uri = Uri.tryParse(event.url!);
-                    if (uri == null) {
-                      return;
-                    }
-                    final launched = await launchUrl(
-                      uri,
-                      mode: LaunchMode.externalApplication,
-                    );
+                    final launched = await openExternalUrl(event.url!);
                     if (!launched && sheetContext.mounted) {
                       ScaffoldMessenger.of(sheetContext).showSnackBar(
                         const SnackBar(

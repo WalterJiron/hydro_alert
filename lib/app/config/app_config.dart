@@ -14,24 +14,17 @@ class AppConfig {
     defaultValue: '',
   );
 
-  static const String openWeatherApiKey = String.fromEnvironment(
-    'OPENWEATHER_API_KEY',
+  /// Primary weather provider. Keep it out of the repository and provide it
+  /// with `--dart-define=WEATHERAPI_KEY=...`.
+  static const String weatherApiKey = String.fromEnvironment(
+    'WEATHERAPI_KEY',
     defaultValue: '',
   );
 
-  static const String mapTileUrl = String.fromEnvironment(
-    'MAP_TILE_URL',
-    defaultValue: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-  );
-
-  static const String mapTileAttribution = String.fromEnvironment(
-    'MAP_TILE_ATTRIBUTION',
-    defaultValue: '© OpenStreetMap contributors',
-  );
-
-  static const String mapUserAgent = String.fromEnvironment(
-    'MAP_USER_AGENT',
-    defaultValue: 'ni.hydroalert.app',
+  /// Optional fallback used when WeatherAPI is not configured or fails.
+  static const String openWeatherApiKey = String.fromEnvironment(
+    'OPENWEATHER_API_KEY',
+    defaultValue: '',
   );
 
   static const bool firebaseEnabled = bool.fromEnvironment(
@@ -66,7 +59,11 @@ class AppConfig {
 
   static bool get hasBackend => apiBaseUrl.trim().isNotEmpty;
 
-  static bool get hasWeather => openWeatherApiKey.trim().isNotEmpty;
+  static bool get hasWeatherApi => weatherApiKey.trim().isNotEmpty;
+
+  static bool get hasOpenWeather => openWeatherApiKey.trim().isNotEmpty;
+
+  static bool get hasWeather => hasWeatherApi || hasOpenWeather;
 
   /// Backend base URL ending in `/`, so Dio joins relative paths correctly.
   static String get normalizedApiBaseUrl {

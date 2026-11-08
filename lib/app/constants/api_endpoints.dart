@@ -6,7 +6,11 @@ class ApiEndpoints {
   static const String usgsBaseUrl = 'https://earthquake.usgs.gov';
   static const String usgsQueryPath = 'fdsnws/event/1/query';
 
-  // OpenWeatherMap One Call API 3.0
+  // WeatherAPI (primary weather source)
+  static const String weatherApiBaseUrl = 'https://api.weatherapi.com';
+  static const String weatherApiForecastPath = 'v1/forecast.json';
+
+  // OpenWeatherMap One Call API 3.0 (fallback weather source)
   static const String openWeatherBaseUrl = 'https://api.openweathermap.org';
   static const String openWeatherOneCallPath = 'data/3.0/onecall';
 
@@ -33,7 +37,7 @@ class ApiEndpoints {
   static const double usgsMinLongitude = -87.7;
   static const double usgsMaxLongitude = -82.5;
 
-  static const String openStreetMapCopyright = 'https://www.openstreetmap.org/copyright';
+  static const String googleMapsSite = 'https://www.google.com/maps';
   static const String usgsEarthquakeSite = 'https://earthquake.usgs.gov';
   static const String rainViewerSite = 'https://www.rainviewer.com';
 }

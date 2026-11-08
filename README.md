@@ -9,9 +9,9 @@
 | Pestaña | Qué hace |
 | --- | --- |
 | **Inicio** | Resumen del día, clima actual, últimos sismos, reportes recientes y acceso rápido a la guía de emergencia. |
-| **Mapa** | OpenStreetMap con marcadores de sismos y reportes, ubicación del usuario y radar RainViewer opcional. |
+| **Mapa** | Google Maps con marcadores personalizados de sismos y reportes, ubicación del usuario y radar RainViewer opcional. |
 | **Reportes** | Lista de reportes comunitarios activos y asistente de dos pasos para crear uno con foto y ubicación. |
-| **Alertas** | Pestañas de sismos USGS y avisos meteorológicos OpenWeatherMap con detalle y enlace a la fuente. |
+| **Alertas** | Pestañas de sismos USGS y avisos meteorológicos de WeatherAPI con detalle y enlace a la fuente. |
 | **Emergencia** | Guía visual de actuación y modo SOS visual a pantalla completa. No llama, no envía ubicación y no despacha ayuda. |
 
 La app inicia con acceso como invitado. No hay credenciales de autenticación ni backend de cuentas en esta entrega.
@@ -22,8 +22,8 @@ La app inicia con acceso como invitado. No hay credenciales de autenticación ni
 - Riverpod 3 (`Notifier` / `AsyncNotifier` + `riverpod_generator`).
 - Freezed 3 y `json_serializable`.
 - `go_router` con `StatefulShellRoute` de cinco ramas.
-- `flutter_map` + OpenStreetMap + RainViewer.
-- Dio para USGS, OpenWeatherMap y el backend NestJS.
+- `google_maps_flutter` + Google Maps + RainViewer.
+- Dio para USGS, WeatherAPI, OpenWeatherMap (respaldo) y el backend NestJS.
 - Firebase Core / Messaging **opcional**.
 - `image_picker` para cámara/galería y `geolocator` para ubicación bajo demanda.
 - Arquitectura Screaming Architecture + MVVM, componentes compartidos inspirados en Atomic Design y tokens centralizados (`AppColors`, `AppTypography`, `AppTheme`).
@@ -43,7 +43,7 @@ lib/
 │   ├── services/        # ubicación, notificaciones y push
 │   └── utils/           # fechas en español y mensajes de error
 ├── features/
-│   ├── alerts/          # USGS, OpenWeather y sus vistas
+│   ├── alerts/          # USGS, WeatherAPI, OpenWeather (respaldo) y sus vistas
 │   ├── auth/            # acceso invitado
 │   ├── community_reports/ # reportes y asistente
 │   ├── emergency_sos/   # guía y overlay crítico
@@ -74,23 +74,48 @@ Nunca se guardan secretos en el repositorio. Usa `--dart-define`:
 
 | Variable | Obligatoria | Descripción |
 | --- | --- | --- |
-| `OPENWEATHER_API_KEY` | No | Clave de OpenWeatherMap One Call 3.0. Sin ella, el clima muestra un estado no disponible. |
+| `WEATHERAPI_KEY` | No | Clave de WeatherAPI (fuente primaria del clima y sus avisos). Sin ella ni `OPENWEATHER_API_KEY`, el clima muestra un estado no disponible. |
+| `OPENWEATHER_API_KEY` | No | Clave de OpenWeatherMap One Call 3.0, usada solo como respaldo cuando WeatherAPI falla. |
 | `API_BASE_URL` | No | URL base del backend NestJS de reportes. Sin ella, los reportes quedan deshabilitados. |
 | `FIREBASE_ENABLED` | No | `true` activa Firebase Messaging. Por defecto `false`. |
 | `SOS_MAGNITUDE_THRESHOLD` | No | Magnitud mínima para el overlay crítico. Por defecto `5.0`. |
 | `SOS_EVENT_MAX_AGE_MINUTES` | No | Antigüedad máxima de un sismo para el overlay. Por defecto `15`. |
-| `MAP_TILE_URL` | No | Plantilla de teselas. Por defecto OpenStreetMap. |
-| `MAP_TILE_ATTRIBUTION` | No | Texto de atribución del mapa. |
-| `MAP_USER_AGENT` | No | User-Agent exigido por el proveedor de teselas. |
+
+Las claves nativas de Google Maps no se pasan por `--dart-define`. Se configuran una sola vez en cada plataforma (ver abajo).
 
 Ejemplo:
 
 ```bash
 flutter run \
-  --dart-define=OPENWEATHER_API_KEY=tu_clave \
+  --dart-define=WEATHERAPI_KEY=tu_clave \
   --dart-define=API_BASE_URL=https://tu-backend.vercel.app/api/v1 \
   --dart-define=FIREBASE_ENABLED=false
 ```
+
+### Google Maps
+
+El mapa base usa el SDK nativo de Google Maps.
+
+**Android**
+
+1. Agrega la clave en `android/local.properties` (ignorado por git):
+
+   ```properties
+   GOOGLE_MAPS_API_KEY=tu_clave
+   ```
+
+2. `android/app/build.gradle.kts` la inyecta como `manifestPlaceholders["googleMapsApiKey"]` y `AndroidManifest.xml` la publica en `com.google.android.geo.API_KEY`.
+
+**iOS**
+
+`ios/Runner/AppDelegate.swift` llama a `GMSServices.provideAPIKey("...")` antes de inicializar Flutter. El proyecto requiere **iOS 14 o superior** por el SDK de Google Maps.
+
+**Restricciones recomendadas en Google Cloud**
+
+- Habilitar **Maps SDK for Android** y **Maps SDK for iOS**.
+- Restringir la clave de Android al package `ni.hydroalert.app` y al SHA-1 del keystore usado para firmar.
+- Restringir la clave de iOS al bundle ID de la app.
+- Si el mapa aparece en blanco o gris, revisa `adb logcat`/Xcode en busca de `API key not valid` o restricciones de paquete/SHA-1.
 
 ## Fuentes de datos y límites
 
@@ -101,18 +126,26 @@ flutter run \
 - Magnitud mínima `2.5`, orden por tiempo, ventana de 30 días, límite 50.
 - Los registros se muestran como información de USGS, nunca como alerta oficial de evacuación.
 
-### OpenWeatherMap
+### WeatherAPI (primaria)
+
+- Endpoint: `https://api.weatherapi.com/v1/forecast.json`.
+- Parámetros: ubicación `lat,lon`, `days=3` (límite del plan Free), `aqi=no`, `alerts=yes`, `lang=es`.
+- Ubicación por defecto: Managua (`12.136389, -86.251389`).
+- Los avisos se muestran como información de WeatherAPI; no sustituyen a SINAPRED o INETER.
+- Sin clave o con clave inválida, el repositorio intenta OpenWeatherMap si está configurado; si tampoco lo está, la interfaz degrada a un estado informativo sin inventar datos.
+
+### OpenWeatherMap (respaldo)
 
 - Endpoint: One Call 3.0 (`data/3.0/onecall`), unidades métricas, idioma español.
-- Ubicación por defecto: Managua (`12.136389, -86.251389`).
+- Solo se consulta cuando WeatherAPI no está configurada o su petición falla.
 - Requiere clave y suscripción activa a One Call 3.0.
-- Sin clave o con clave inválida, la interfaz degrada a un estado informativo; no se inventan datos.
 
 ### RainViewer
 
 - Metadatos: `https://api.rainviewer.com/public/weather-maps.json`.
 - Capa de radar opcional, activada manualmente por el usuario.
-- Se muestra atribución de OpenStreetMap y RainViewer.
+- RainViewer sirve teselas de radar hasta **zoom 7**; por encima, la app recorta y amplía la tesela padre de zoom 7 en lugar de pedir niveles inexistentes.
+- Se muestra atribución de Google Maps (logotipo del mapa) y RainViewer cuando la capa está activa. La leyenda incluye los créditos completos.
 
 ### Reportes comunitarios
 
@@ -165,7 +198,7 @@ Estado actual: `flutter analyze` sin incidencias y pruebas de widget aprobadas.
 ## Pendientes conocidos
 
 - Confirmar el contrato OpenAPI del backend NestJS y la URL real de Vercel.
-- Configurar la clave de OpenWeatherMap para habilitar clima y avisos.
+- Configurar la clave de WeatherAPI para habilitar clima y avisos (OpenWeatherMap es opcional como respaldo).
 - Configurar Firebase si se requieren notificaciones push.
 - Implementar autenticación real cuando exista el servicio de cuentas.
 - Configurar firma de release para Android e iOS.

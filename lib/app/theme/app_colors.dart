@@ -45,4 +45,7 @@ class AppColors {
   // Map
   static const Color mapUserLocation = Color(0xFF2563EB);
   static const Color mapMarkerBorder = Color(0xFFFFFFFF);
+  static const Color mapPanel = Color(0xF5FFFFFF);
+  static const Color mapPinShadow = Color(0x400F172A);
+  static const Color mapPulseRing = Color(0x332563EB);
 }

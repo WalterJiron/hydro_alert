@@ -13,7 +13,7 @@ void main() {
         child: MaterialApp(theme: AppTheme.light, home: const WelcomeView()),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('Continuar como invitado'), findsOneWidget);
     expect(find.text('HydroAlert'), findsOneWidget);
