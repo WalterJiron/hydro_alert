@@ -139,7 +139,7 @@ WeatherAlert? _toWeatherAlert(WeatherApiAlert alert) {
             : 'Aviso meteorológico');
 
   return WeatherAlert(
-    senderName: 'WeatherAPI',
+    senderName: 'Servicio meteorológico',
     event: event,
     start: start.toLocal(),
     end: end.toLocal(),

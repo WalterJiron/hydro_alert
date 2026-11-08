@@ -91,7 +91,7 @@ class HomeDashboardView extends ConsumerWidget {
               order: 2,
               child: SectionHeader(
                 title: 'Clima actual',
-                subtitle: 'Datos de WeatherAPI para Managua',
+                subtitle: 'Condiciones actuales en Managua',
               ),
             ),
             const SizedBox(height: 10),

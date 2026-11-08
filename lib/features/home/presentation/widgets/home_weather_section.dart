@@ -25,8 +25,8 @@ class HomeWeatherSection extends ConsumerWidget {
         icon: LucideIcons.cloudSun,
         title: 'Clima no disponible',
         message:
-            'La información meteorológica se activará cuando se configure '
-            'la clave de WeatherAPI en esta compilación.',
+            'La información meteorológica estará disponible cuando el '
+            'servicio de clima esté configurado.',
       );
     }
 
@@ -39,8 +39,8 @@ class HomeWeatherSection extends ConsumerWidget {
           icon: LucideIcons.cloudSun,
           title: 'Clima no disponible',
           message: error is ConfigurationFailure
-              ? 'La información meteorológica se activará cuando se configure '
-                    'la clave de WeatherAPI en esta compilación.'
+              ? 'La información meteorológica estará disponible cuando el '
+                    'servicio de clima esté configurado.'
               : errorMessageOf(error),
           onRetry: error is ConfigurationFailure
               ? null

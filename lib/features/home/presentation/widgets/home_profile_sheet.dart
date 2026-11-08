@@ -41,7 +41,7 @@ Future<void> showHomeProfileSheet(BuildContext context, WidgetRef ref) {
                 icon: LucideIcons.info,
                 title: 'Sobre los datos',
                 message:
-                    'Sismos: USGS. Clima: WeatherAPI. '
+                    'Sismos: USGS. Clima: condiciones y avisos meteorológicos. '
                     'Los reportes comunitarios no están verificados. '
                     'HydroAlert no sustituye a las autoridades.',
               ),

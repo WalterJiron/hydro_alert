@@ -37,8 +37,8 @@ class WeatherAlertsTab extends ConsumerWidget {
                 icon: LucideIcons.cloudSun,
                 title: 'Clima no configurado',
                 message:
-                    'La información meteorológica se activará cuando se configure '
-                    'la clave de WeatherAPI en esta compilación.',
+                    'La información meteorológica estará disponible cuando el '
+                    'servicio de clima esté configurado.',
               ),
             )
           else
@@ -47,8 +47,8 @@ class WeatherAlertsTab extends ConsumerWidget {
               child: InfoBanner(
                 icon: LucideIcons.info,
                 message:
-                    'Los avisos meteorológicos provienen de WeatherAPI y no '
-                    'sustituyen la información oficial de SINAPRED o INETER.',
+                    'Los avisos meteorológicos no sustituyen la información '
+                    'oficial de SINAPRED o INETER.',
               ),
             ),
           const SizedBox(height: 16),
@@ -56,8 +56,7 @@ class WeatherAlertsTab extends ConsumerWidget {
             const EmptyState(
               icon: LucideIcons.cloudSun,
               title: 'Información no disponible',
-              message:
-                  'Configura WeatherAPI para consultar el clima y sus avisos.',
+              message: 'El servicio de clima no está configurado.',
             )
           else
             ...weather.when(
@@ -73,8 +72,7 @@ class WeatherAlertsTab extends ConsumerWidget {
                     EmptyState(
                       icon: LucideIcons.cloudSun,
                       title: 'Información no disponible',
-                      message:
-                          'Configura WeatherAPI para consultar el clima y sus avisos.',
+                      message: 'El servicio de clima no está configurado.',
                     ),
                   ];
                 }
@@ -130,8 +128,7 @@ class WeatherAlertsTab extends ConsumerWidget {
             child: EmptyState(
               icon: LucideIcons.cloudSun,
               title: 'Sin avisos activos',
-              message:
-                  'WeatherAPI no reporta avisos meteorológicos para esta ubicación.',
+              message: 'No hay avisos meteorológicos para esta ubicación.',
             ),
           ),
         )

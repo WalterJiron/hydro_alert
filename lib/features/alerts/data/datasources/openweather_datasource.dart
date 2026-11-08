@@ -106,7 +106,7 @@ class OpenWeatherDataSource implements WeatherDataSource {
     return WeatherAlert(
       senderName: alert.senderName?.trim().isNotEmpty == true
           ? alert.senderName!.trim()
-          : 'OpenWeatherMap',
+          : 'Servicio meteorológico',
       event: alert.event?.trim().isNotEmpty == true
           ? alert.event!.trim()
           : 'Aviso meteorológico',

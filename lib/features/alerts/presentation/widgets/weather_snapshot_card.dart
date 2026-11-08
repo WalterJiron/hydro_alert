@@ -4,7 +4,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/utils/date_formatter.dart';
-import '../../../../shared/atoms/alert_badge.dart';
 import '../../../../shared/molecules/app_card.dart';
 import '../../../../shared/motion/app_animated_entrance.dart';
 import '../../../../shared/motion/app_animated_text.dart';
@@ -68,11 +67,6 @@ class WeatherSnapshotCard extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-              AlertBadge(
-                label: 'WeatherAPI',
-                tone: AppBadgeTone.info,
-                icon: LucideIcons.cloudSun,
               ),
             ],
           ),

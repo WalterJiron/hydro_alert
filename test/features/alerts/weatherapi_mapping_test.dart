@@ -91,7 +91,7 @@ void main() {
       expect(snapshot.alerts, hasLength(1));
 
       final alert = snapshot.alerts.single;
-      expect(alert.senderName, 'WeatherAPI');
+      expect(alert.senderName, 'Servicio meteorológico');
       expect(alert.event, 'Aviso de lluvia');
       expect(alert.description, 'Se esperan lluvias intensas.');
       expect(alert.start.isUtc, isFalse);
