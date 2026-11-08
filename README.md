@@ -9,7 +9,7 @@
 | Pestaña | Qué hace |
 | --- | --- |
 | **Inicio** | Resumen del día, clima actual, últimos sismos, reportes recientes y acceso rápido a la guía de emergencia. |
-| **Mapa** | Google Maps con marcadores personalizados de sismos y reportes, ubicación del usuario y radar RainViewer opcional. |
+| **Mapa** | Mapbox con marcadores personalizados de sismos y reportes, ubicación del usuario y radar RainViewer animado opcional. |
 | **Reportes** | Lista de reportes comunitarios activos y asistente de dos pasos para crear uno con foto y ubicación. |
 | **Alertas** | Pestañas de sismos USGS y avisos meteorológicos de WeatherAPI con detalle y enlace a la fuente. |
 | **Emergencia** | Guía visual de actuación y modo SOS visual a pantalla completa. No llama, no envía ubicación y no despacha ayuda. |
@@ -22,7 +22,7 @@ La app inicia con acceso como invitado. No hay credenciales de autenticación ni
 - Riverpod 3 (`Notifier` / `AsyncNotifier` + `riverpod_generator`).
 - Freezed 3 y `json_serializable`.
 - `go_router` con `StatefulShellRoute` de cinco ramas.
-- `google_maps_flutter` + Google Maps + RainViewer.
+- `mapbox_maps_flutter` + Mapbox + RainViewer.
 - Dio para USGS, WeatherAPI, OpenWeatherMap (respaldo) y el backend NestJS.
 - Firebase Core / Messaging **opcional**.
 - `image_picker` para cámara/galería y `geolocator` para ubicación bajo demanda.
@@ -76,46 +76,35 @@ Nunca se guardan secretos en el repositorio. Usa `--dart-define`:
 | --- | --- | --- |
 | `WEATHERAPI_KEY` | No | Clave de WeatherAPI (fuente primaria del clima y sus avisos). Sin ella ni `OPENWEATHER_API_KEY`, el clima muestra un estado no disponible. |
 | `OPENWEATHER_API_KEY` | No | Clave de OpenWeatherMap One Call 3.0, usada solo como respaldo cuando WeatherAPI falla. |
+| `MAPBOX_ACCESS_TOKEN` | No | Token público de Mapbox (`pk.`). Sin él, la pestaña de mapa muestra un estado no configurado y el resto de la app sigue funcionando. |
 | `API_BASE_URL` | No | URL base del backend NestJS de reportes. Sin ella, los reportes quedan deshabilitados. |
 | `FIREBASE_ENABLED` | No | `true` activa Firebase Messaging. Por defecto `false`. |
 | `SOS_MAGNITUDE_THRESHOLD` | No | Magnitud mínima para el overlay crítico. Por defecto `5.0`. |
 | `SOS_EVENT_MAX_AGE_MINUTES` | No | Antigüedad máxima de un sismo para el overlay. Por defecto `15`. |
 
-Las claves nativas de Google Maps no se pasan por `--dart-define`. Se configuran una sola vez en cada plataforma (ver abajo).
+El token de Mapbox se pasa como variable de compilación; no hay claves nativas que configurar en el código.
 
 Ejemplo:
 
 ```bash
 flutter run \
+  --dart-define=MAPBOX_ACCESS_TOKEN=pk.tu_token \
   --dart-define=WEATHERAPI_KEY=tu_clave \
   --dart-define=API_BASE_URL=https://tu-backend.vercel.app/api/v1 \
   --dart-define=FIREBASE_ENABLED=false
 ```
 
-### Google Maps
+También puedes crear un `dart_defines.json` local (ignorado por git) y compilar con `--dart-define-from-file=dart_defines.json`.
 
-El mapa base usa el SDK nativo de Google Maps.
+### Mapbox
 
-**Android**
+El mapa base usa `mapbox_maps_flutter` con el estilo **Outdoors**.
 
-1. Agrega la clave en `android/local.properties` (ignorado por git):
+1. Crea un token público (`pk.`) en tu cuenta de Mapbox.
+2. Compílalo con `--dart-define=MAPBOX_ACCESS_TOKEN=pk...`.
+3. Restringe el token a tu aplicación (URL de descarga o bundle/package) desde el panel de Mapbox.
 
-   ```properties
-   GOOGLE_MAPS_API_KEY=tu_clave
-   ```
-
-2. `android/app/build.gradle.kts` la inyecta como `manifestPlaceholders["googleMapsApiKey"]` y `AndroidManifest.xml` la publica en `com.google.android.geo.API_KEY`.
-
-**iOS**
-
-`ios/Runner/AppDelegate.swift` llama a `GMSServices.provideAPIKey("...")` antes de inicializar Flutter. El proyecto requiere **iOS 14 o superior** por el SDK de Google Maps.
-
-**Restricciones recomendadas en Google Cloud**
-
-- Habilitar **Maps SDK for Android** y **Maps SDK for iOS**.
-- Restringir la clave de Android al package `ni.hydroalert.app` y al SHA-1 del keystore usado para firmar.
-- Restringir la clave de iOS al bundle ID de la app.
-- Si el mapa aparece en blanco o gris, revisa `adb logcat`/Xcode en busca de `API key not valid` o restricciones de paquete/SHA-1.
+Sin token, `AppConfig.hasMapbox` es `false`: la app no construye el `MapWidget`, muestra un estado informativo y deshabilita los controles del mapa. El resto de la aplicación funciona con normalidad.
 
 ## Fuentes de datos y límites
 
@@ -143,9 +132,11 @@ El mapa base usa el SDK nativo de Google Maps.
 ### RainViewer
 
 - Metadatos: `https://api.rainviewer.com/public/weather-maps.json`.
-- Capa de radar opcional, activada manualmente por el usuario.
-- RainViewer sirve teselas de radar hasta **zoom 7**; por encima, la app recorta y amplía la tesela padre de zoom 7 en lugar de pedir niveles inexistentes.
-- Se muestra atribución de Google Maps (logotipo del mapa) y RainViewer cuando la capa está activa. La leyenda incluye los créditos completos.
+- Capa de radar opcional, activada manualmente por el usuario, con reproducción animada de los últimos fotogramas.
+- Cada fotograma se dibuja con capas raster nativas de Mapbox, debajo de los pines de sismos y reportes.
+- RainViewer sirve teselas de radar hasta **zoom 7**; Mapbox sobrescala la imagen por encima de ese nivel.
+- Con movimiento reducido activo se muestra solo el último fotograma, sin bucle.
+- Se muestra el crédito de RainViewer y la hora del fotograma; el logotipo y la atribución de Mapbox los dibuja el propio mapa.
 
 ### Reportes comunitarios
 
@@ -199,6 +190,7 @@ Estado actual: `flutter analyze` sin incidencias y pruebas de widget aprobadas.
 
 - Confirmar el contrato OpenAPI del backend NestJS y la URL real de Vercel.
 - Configurar la clave de WeatherAPI para habilitar clima y avisos (OpenWeatherMap es opcional como respaldo).
+- Configurar `MAPBOX_ACCESS_TOKEN` para habilitar el mapa y el radar.
 - Configurar Firebase si se requieren notificaciones push.
 - Implementar autenticación real cuando exista el servicio de cuentas.
 - Configurar firma de release para Android e iOS.

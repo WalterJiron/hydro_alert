@@ -41,7 +41,7 @@ final class MapViewModelProvider
   }
 }
 
-String _$mapViewModelHash() => r'ad9676a6a39282666ef102607924240e1e3ba221';
+String _$mapViewModelHash() => r'22f7e3c41d0ebad63313d0281873ef293f247cfd';
 
 abstract class _$MapViewModel extends $Notifier<MapViewState> {
   MapViewState build();

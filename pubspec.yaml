@@ -28,7 +28,7 @@ dependencies:
   lucide_icons_flutter: 4.0.2
   riverpod_annotation: 4.0.2
   url_launcher: 6.3.3
-  google_maps_flutter: 2.18.1
+  mapbox_maps_flutter: 3.34.2
 
 dev_dependencies:
   flutter_test:

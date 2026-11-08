@@ -42,13 +42,13 @@ class MapViewModel extends _$MapViewModel {
     );
 
     try {
-      final frame = await ref
+      final frames = await ref
           .read(rainViewerDataSourceProvider)
-          .fetchLatestRadarFrame();
+          .fetchRadarFrames();
       if (!ref.mounted) {
         return;
       }
-      if (frame == null) {
+      if (frames.isEmpty) {
         state = state.copyWith(
           isLoadingRadar: false,
           radarEnabled: false,
@@ -59,7 +59,7 @@ class MapViewModel extends _$MapViewModel {
       state = state.copyWith(
         isLoadingRadar: false,
         radarEnabled: true,
-        radarFrame: frame,
+        radarFrames: frames,
       );
     } on AppFailure catch (error) {
       if (!ref.mounted) {

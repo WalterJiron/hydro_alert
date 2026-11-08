@@ -15,7 +15,7 @@ abstract class MapViewState with _$MapViewState {
     @Default(false) bool isLoadingRadar,
     @Default(false) bool isLocating,
     @Default(false) bool locationBannerDismissed,
-    RadarFrame? radarFrame,
+    @Default(<RadarFrame>[]) List<RadarFrame> radarFrames,
     String? radarError,
     LatLng? userLocation,
     String? locationError,
@@ -24,7 +24,10 @@ abstract class MapViewState with _$MapViewState {
 
   const MapViewState._();
 
-  bool get hasRadar => radarEnabled && radarFrame != null;
+  bool get hasRadar => radarEnabled && radarFrames.isNotEmpty;
+
+  RadarFrame? get latestRadarFrame =>
+      radarFrames.isEmpty ? null : radarFrames.last;
 
   bool get hasLocationIssue =>
       locationAvailability != null &&
