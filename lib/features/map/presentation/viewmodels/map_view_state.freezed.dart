@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MapViewState {
 
- bool get showEarthquakes; bool get showReports; bool get radarEnabled; bool get isLoadingRadar; bool get isLocating; bool get locationBannerDismissed; List<RadarFrame> get radarFrames; String? get radarError; LatLng? get userLocation; String? get locationError; LocationAvailability? get locationAvailability;
+ bool get showEarthquakes; bool get showReports; bool get radarEnabled; bool get isLoadingRadar; bool get isLocating; bool get locationBannerDismissed; RadarFrame? get radarFrame; String? get radarError; LatLng? get userLocation; String? get locationError; LocationAvailability? get locationAvailability;
 /// Create a copy of MapViewState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $MapViewStateCopyWith<MapViewState> get copyWith => _$MapViewStateCopyWithImpl<M
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MapViewState&&(identical(other.showEarthquakes, showEarthquakes) || other.showEarthquakes == showEarthquakes)&&(identical(other.showReports, showReports) || other.showReports == showReports)&&(identical(other.radarEnabled, radarEnabled) || other.radarEnabled == radarEnabled)&&(identical(other.isLoadingRadar, isLoadingRadar) || other.isLoadingRadar == isLoadingRadar)&&(identical(other.isLocating, isLocating) || other.isLocating == isLocating)&&(identical(other.locationBannerDismissed, locationBannerDismissed) || other.locationBannerDismissed == locationBannerDismissed)&&const DeepCollectionEquality().equals(other.radarFrames, radarFrames)&&(identical(other.radarError, radarError) || other.radarError == radarError)&&(identical(other.userLocation, userLocation) || other.userLocation == userLocation)&&(identical(other.locationError, locationError) || other.locationError == locationError)&&(identical(other.locationAvailability, locationAvailability) || other.locationAvailability == locationAvailability));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MapViewState&&(identical(other.showEarthquakes, showEarthquakes) || other.showEarthquakes == showEarthquakes)&&(identical(other.showReports, showReports) || other.showReports == showReports)&&(identical(other.radarEnabled, radarEnabled) || other.radarEnabled == radarEnabled)&&(identical(other.isLoadingRadar, isLoadingRadar) || other.isLoadingRadar == isLoadingRadar)&&(identical(other.isLocating, isLocating) || other.isLocating == isLocating)&&(identical(other.locationBannerDismissed, locationBannerDismissed) || other.locationBannerDismissed == locationBannerDismissed)&&(identical(other.radarFrame, radarFrame) || other.radarFrame == radarFrame)&&(identical(other.radarError, radarError) || other.radarError == radarError)&&(identical(other.userLocation, userLocation) || other.userLocation == userLocation)&&(identical(other.locationError, locationError) || other.locationError == locationError)&&(identical(other.locationAvailability, locationAvailability) || other.locationAvailability == locationAvailability));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,showEarthquakes,showReports,radarEnabled,isLoadingRadar,isLocating,locationBannerDismissed,const DeepCollectionEquality().hash(radarFrames),radarError,userLocation,locationError,locationAvailability);
+int get hashCode => Object.hash(runtimeType,showEarthquakes,showReports,radarEnabled,isLoadingRadar,isLocating,locationBannerDismissed,radarFrame,radarError,userLocation,locationError,locationAvailability);
 
 @override
 String toString() {
-  return 'MapViewState(showEarthquakes: $showEarthquakes, showReports: $showReports, radarEnabled: $radarEnabled, isLoadingRadar: $isLoadingRadar, isLocating: $isLocating, locationBannerDismissed: $locationBannerDismissed, radarFrames: $radarFrames, radarError: $radarError, userLocation: $userLocation, locationError: $locationError, locationAvailability: $locationAvailability)';
+  return 'MapViewState(showEarthquakes: $showEarthquakes, showReports: $showReports, radarEnabled: $radarEnabled, isLoadingRadar: $isLoadingRadar, isLocating: $isLocating, locationBannerDismissed: $locationBannerDismissed, radarFrame: $radarFrame, radarError: $radarError, userLocation: $userLocation, locationError: $locationError, locationAvailability: $locationAvailability)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $MapViewStateCopyWith<$Res>  {
   factory $MapViewStateCopyWith(MapViewState value, $Res Function(MapViewState) _then) = _$MapViewStateCopyWithImpl;
 @useResult
 $Res call({
- bool showEarthquakes, bool showReports, bool radarEnabled, bool isLoadingRadar, bool isLocating, bool locationBannerDismissed, List<RadarFrame> radarFrames, String? radarError, LatLng? userLocation, String? locationError, LocationAvailability? locationAvailability
+ bool showEarthquakes, bool showReports, bool radarEnabled, bool isLoadingRadar, bool isLocating, bool locationBannerDismissed, RadarFrame? radarFrame, String? radarError, LatLng? userLocation, String? locationError, LocationAvailability? locationAvailability
 });
 
 
@@ -62,7 +62,7 @@ class _$MapViewStateCopyWithImpl<$Res>
 
 /// Create a copy of MapViewState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? showEarthquakes = null,Object? showReports = null,Object? radarEnabled = null,Object? isLoadingRadar = null,Object? isLocating = null,Object? locationBannerDismissed = null,Object? radarFrames = null,Object? radarError = freezed,Object? userLocation = freezed,Object? locationError = freezed,Object? locationAvailability = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? showEarthquakes = null,Object? showReports = null,Object? radarEnabled = null,Object? isLoadingRadar = null,Object? isLocating = null,Object? locationBannerDismissed = null,Object? radarFrame = freezed,Object? radarError = freezed,Object? userLocation = freezed,Object? locationError = freezed,Object? locationAvailability = freezed,}) {
   return _then(_self.copyWith(
 showEarthquakes: null == showEarthquakes ? _self.showEarthquakes : showEarthquakes // ignore: cast_nullable_to_non_nullable
 as bool,showReports: null == showReports ? _self.showReports : showReports // ignore: cast_nullable_to_non_nullable
@@ -70,8 +70,8 @@ as bool,radarEnabled: null == radarEnabled ? _self.radarEnabled : radarEnabled /
 as bool,isLoadingRadar: null == isLoadingRadar ? _self.isLoadingRadar : isLoadingRadar // ignore: cast_nullable_to_non_nullable
 as bool,isLocating: null == isLocating ? _self.isLocating : isLocating // ignore: cast_nullable_to_non_nullable
 as bool,locationBannerDismissed: null == locationBannerDismissed ? _self.locationBannerDismissed : locationBannerDismissed // ignore: cast_nullable_to_non_nullable
-as bool,radarFrames: null == radarFrames ? _self.radarFrames : radarFrames // ignore: cast_nullable_to_non_nullable
-as List<RadarFrame>,radarError: freezed == radarError ? _self.radarError : radarError // ignore: cast_nullable_to_non_nullable
+as bool,radarFrame: freezed == radarFrame ? _self.radarFrame : radarFrame // ignore: cast_nullable_to_non_nullable
+as RadarFrame?,radarError: freezed == radarError ? _self.radarError : radarError // ignore: cast_nullable_to_non_nullable
 as String?,userLocation: freezed == userLocation ? _self.userLocation : userLocation // ignore: cast_nullable_to_non_nullable
 as LatLng?,locationError: freezed == locationError ? _self.locationError : locationError // ignore: cast_nullable_to_non_nullable
 as String?,locationAvailability: freezed == locationAvailability ? _self.locationAvailability : locationAvailability // ignore: cast_nullable_to_non_nullable
@@ -160,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool showEarthquakes,  bool showReports,  bool radarEnabled,  bool isLoadingRadar,  bool isLocating,  bool locationBannerDismissed,  List<RadarFrame> radarFrames,  String? radarError,  LatLng? userLocation,  String? locationError,  LocationAvailability? locationAvailability)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool showEarthquakes,  bool showReports,  bool radarEnabled,  bool isLoadingRadar,  bool isLocating,  bool locationBannerDismissed,  RadarFrame? radarFrame,  String? radarError,  LatLng? userLocation,  String? locationError,  LocationAvailability? locationAvailability)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MapViewState() when $default != null:
-return $default(_that.showEarthquakes,_that.showReports,_that.radarEnabled,_that.isLoadingRadar,_that.isLocating,_that.locationBannerDismissed,_that.radarFrames,_that.radarError,_that.userLocation,_that.locationError,_that.locationAvailability);case _:
+return $default(_that.showEarthquakes,_that.showReports,_that.radarEnabled,_that.isLoadingRadar,_that.isLocating,_that.locationBannerDismissed,_that.radarFrame,_that.radarError,_that.userLocation,_that.locationError,_that.locationAvailability);case _:
   return orElse();
 
 }
@@ -181,10 +181,10 @@ return $default(_that.showEarthquakes,_that.showReports,_that.radarEnabled,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool showEarthquakes,  bool showReports,  bool radarEnabled,  bool isLoadingRadar,  bool isLocating,  bool locationBannerDismissed,  List<RadarFrame> radarFrames,  String? radarError,  LatLng? userLocation,  String? locationError,  LocationAvailability? locationAvailability)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool showEarthquakes,  bool showReports,  bool radarEnabled,  bool isLoadingRadar,  bool isLocating,  bool locationBannerDismissed,  RadarFrame? radarFrame,  String? radarError,  LatLng? userLocation,  String? locationError,  LocationAvailability? locationAvailability)  $default,) {final _that = this;
 switch (_that) {
 case _MapViewState():
-return $default(_that.showEarthquakes,_that.showReports,_that.radarEnabled,_that.isLoadingRadar,_that.isLocating,_that.locationBannerDismissed,_that.radarFrames,_that.radarError,_that.userLocation,_that.locationError,_that.locationAvailability);case _:
+return $default(_that.showEarthquakes,_that.showReports,_that.radarEnabled,_that.isLoadingRadar,_that.isLocating,_that.locationBannerDismissed,_that.radarFrame,_that.radarError,_that.userLocation,_that.locationError,_that.locationAvailability);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +201,10 @@ return $default(_that.showEarthquakes,_that.showReports,_that.radarEnabled,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool showEarthquakes,  bool showReports,  bool radarEnabled,  bool isLoadingRadar,  bool isLocating,  bool locationBannerDismissed,  List<RadarFrame> radarFrames,  String? radarError,  LatLng? userLocation,  String? locationError,  LocationAvailability? locationAvailability)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool showEarthquakes,  bool showReports,  bool radarEnabled,  bool isLoadingRadar,  bool isLocating,  bool locationBannerDismissed,  RadarFrame? radarFrame,  String? radarError,  LatLng? userLocation,  String? locationError,  LocationAvailability? locationAvailability)?  $default,) {final _that = this;
 switch (_that) {
 case _MapViewState() when $default != null:
-return $default(_that.showEarthquakes,_that.showReports,_that.radarEnabled,_that.isLoadingRadar,_that.isLocating,_that.locationBannerDismissed,_that.radarFrames,_that.radarError,_that.userLocation,_that.locationError,_that.locationAvailability);case _:
+return $default(_that.showEarthquakes,_that.showReports,_that.radarEnabled,_that.isLoadingRadar,_that.isLocating,_that.locationBannerDismissed,_that.radarFrame,_that.radarError,_that.userLocation,_that.locationError,_that.locationAvailability);case _:
   return null;
 
 }
@@ -216,7 +216,7 @@ return $default(_that.showEarthquakes,_that.showReports,_that.radarEnabled,_that
 
 
 class _MapViewState extends MapViewState {
-  const _MapViewState({this.showEarthquakes = true, this.showReports = true, this.radarEnabled = false, this.isLoadingRadar = false, this.isLocating = false, this.locationBannerDismissed = false, final  List<RadarFrame> radarFrames = const <RadarFrame>[], this.radarError, this.userLocation, this.locationError, this.locationAvailability}): _radarFrames = radarFrames,super._();
+  const _MapViewState({this.showEarthquakes = true, this.showReports = true, this.radarEnabled = false, this.isLoadingRadar = false, this.isLocating = false, this.locationBannerDismissed = false, this.radarFrame, this.radarError, this.userLocation, this.locationError, this.locationAvailability}): super._();
   
 
 @override@JsonKey() final  bool showEarthquakes;
@@ -225,13 +225,7 @@ class _MapViewState extends MapViewState {
 @override@JsonKey() final  bool isLoadingRadar;
 @override@JsonKey() final  bool isLocating;
 @override@JsonKey() final  bool locationBannerDismissed;
- final  List<RadarFrame> _radarFrames;
-@override@JsonKey() List<RadarFrame> get radarFrames {
-  if (_radarFrames is EqualUnmodifiableListView) return _radarFrames;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_radarFrames);
-}
-
+@override final  RadarFrame? radarFrame;
 @override final  String? radarError;
 @override final  LatLng? userLocation;
 @override final  String? locationError;
@@ -247,16 +241,16 @@ _$MapViewStateCopyWith<_MapViewState> get copyWith => __$MapViewStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MapViewState&&(identical(other.showEarthquakes, showEarthquakes) || other.showEarthquakes == showEarthquakes)&&(identical(other.showReports, showReports) || other.showReports == showReports)&&(identical(other.radarEnabled, radarEnabled) || other.radarEnabled == radarEnabled)&&(identical(other.isLoadingRadar, isLoadingRadar) || other.isLoadingRadar == isLoadingRadar)&&(identical(other.isLocating, isLocating) || other.isLocating == isLocating)&&(identical(other.locationBannerDismissed, locationBannerDismissed) || other.locationBannerDismissed == locationBannerDismissed)&&const DeepCollectionEquality().equals(other._radarFrames, _radarFrames)&&(identical(other.radarError, radarError) || other.radarError == radarError)&&(identical(other.userLocation, userLocation) || other.userLocation == userLocation)&&(identical(other.locationError, locationError) || other.locationError == locationError)&&(identical(other.locationAvailability, locationAvailability) || other.locationAvailability == locationAvailability));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MapViewState&&(identical(other.showEarthquakes, showEarthquakes) || other.showEarthquakes == showEarthquakes)&&(identical(other.showReports, showReports) || other.showReports == showReports)&&(identical(other.radarEnabled, radarEnabled) || other.radarEnabled == radarEnabled)&&(identical(other.isLoadingRadar, isLoadingRadar) || other.isLoadingRadar == isLoadingRadar)&&(identical(other.isLocating, isLocating) || other.isLocating == isLocating)&&(identical(other.locationBannerDismissed, locationBannerDismissed) || other.locationBannerDismissed == locationBannerDismissed)&&(identical(other.radarFrame, radarFrame) || other.radarFrame == radarFrame)&&(identical(other.radarError, radarError) || other.radarError == radarError)&&(identical(other.userLocation, userLocation) || other.userLocation == userLocation)&&(identical(other.locationError, locationError) || other.locationError == locationError)&&(identical(other.locationAvailability, locationAvailability) || other.locationAvailability == locationAvailability));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,showEarthquakes,showReports,radarEnabled,isLoadingRadar,isLocating,locationBannerDismissed,const DeepCollectionEquality().hash(_radarFrames),radarError,userLocation,locationError,locationAvailability);
+int get hashCode => Object.hash(runtimeType,showEarthquakes,showReports,radarEnabled,isLoadingRadar,isLocating,locationBannerDismissed,radarFrame,radarError,userLocation,locationError,locationAvailability);
 
 @override
 String toString() {
-  return 'MapViewState(showEarthquakes: $showEarthquakes, showReports: $showReports, radarEnabled: $radarEnabled, isLoadingRadar: $isLoadingRadar, isLocating: $isLocating, locationBannerDismissed: $locationBannerDismissed, radarFrames: $radarFrames, radarError: $radarError, userLocation: $userLocation, locationError: $locationError, locationAvailability: $locationAvailability)';
+  return 'MapViewState(showEarthquakes: $showEarthquakes, showReports: $showReports, radarEnabled: $radarEnabled, isLoadingRadar: $isLoadingRadar, isLocating: $isLocating, locationBannerDismissed: $locationBannerDismissed, radarFrame: $radarFrame, radarError: $radarError, userLocation: $userLocation, locationError: $locationError, locationAvailability: $locationAvailability)';
 }
 
 
@@ -267,7 +261,7 @@ abstract mixin class _$MapViewStateCopyWith<$Res> implements $MapViewStateCopyWi
   factory _$MapViewStateCopyWith(_MapViewState value, $Res Function(_MapViewState) _then) = __$MapViewStateCopyWithImpl;
 @override @useResult
 $Res call({
- bool showEarthquakes, bool showReports, bool radarEnabled, bool isLoadingRadar, bool isLocating, bool locationBannerDismissed, List<RadarFrame> radarFrames, String? radarError, LatLng? userLocation, String? locationError, LocationAvailability? locationAvailability
+ bool showEarthquakes, bool showReports, bool radarEnabled, bool isLoadingRadar, bool isLocating, bool locationBannerDismissed, RadarFrame? radarFrame, String? radarError, LatLng? userLocation, String? locationError, LocationAvailability? locationAvailability
 });
 
 
@@ -284,7 +278,7 @@ class __$MapViewStateCopyWithImpl<$Res>
 
 /// Create a copy of MapViewState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? showEarthquakes = null,Object? showReports = null,Object? radarEnabled = null,Object? isLoadingRadar = null,Object? isLocating = null,Object? locationBannerDismissed = null,Object? radarFrames = null,Object? radarError = freezed,Object? userLocation = freezed,Object? locationError = freezed,Object? locationAvailability = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? showEarthquakes = null,Object? showReports = null,Object? radarEnabled = null,Object? isLoadingRadar = null,Object? isLocating = null,Object? locationBannerDismissed = null,Object? radarFrame = freezed,Object? radarError = freezed,Object? userLocation = freezed,Object? locationError = freezed,Object? locationAvailability = freezed,}) {
   return _then(_MapViewState(
 showEarthquakes: null == showEarthquakes ? _self.showEarthquakes : showEarthquakes // ignore: cast_nullable_to_non_nullable
 as bool,showReports: null == showReports ? _self.showReports : showReports // ignore: cast_nullable_to_non_nullable
@@ -292,8 +286,8 @@ as bool,radarEnabled: null == radarEnabled ? _self.radarEnabled : radarEnabled /
 as bool,isLoadingRadar: null == isLoadingRadar ? _self.isLoadingRadar : isLoadingRadar // ignore: cast_nullable_to_non_nullable
 as bool,isLocating: null == isLocating ? _self.isLocating : isLocating // ignore: cast_nullable_to_non_nullable
 as bool,locationBannerDismissed: null == locationBannerDismissed ? _self.locationBannerDismissed : locationBannerDismissed // ignore: cast_nullable_to_non_nullable
-as bool,radarFrames: null == radarFrames ? _self._radarFrames : radarFrames // ignore: cast_nullable_to_non_nullable
-as List<RadarFrame>,radarError: freezed == radarError ? _self.radarError : radarError // ignore: cast_nullable_to_non_nullable
+as bool,radarFrame: freezed == radarFrame ? _self.radarFrame : radarFrame // ignore: cast_nullable_to_non_nullable
+as RadarFrame?,radarError: freezed == radarError ? _self.radarError : radarError // ignore: cast_nullable_to_non_nullable
 as String?,userLocation: freezed == userLocation ? _self.userLocation : userLocation // ignore: cast_nullable_to_non_nullable
 as LatLng?,locationError: freezed == locationError ? _self.locationError : locationError // ignore: cast_nullable_to_non_nullable
 as String?,locationAvailability: freezed == locationAvailability ? _self.locationAvailability : locationAvailability // ignore: cast_nullable_to_non_nullable

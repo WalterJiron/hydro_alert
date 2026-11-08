@@ -104,7 +104,7 @@ Future<void> showMapLegendSheet(
                 style: AppTypography.bodySmall,
               ),
               const SizedBox(height: 6),
-              Text('Mapa base: Mapbox.', style: AppTypography.bodySmall),
+              Text('Mapa base: Google Maps.', style: AppTypography.bodySmall),
               const SizedBox(height: 18),
               const InfoBanner(
                 icon: LucideIcons.shieldAlert,
@@ -120,8 +120,8 @@ Future<void> showMapLegendSheet(
                 runSpacing: 4,
                 children: [
                   _AttributionLink(
-                    label: '© Mapbox',
-                    url: ApiEndpoints.mapboxSite,
+                    label: '© Google Maps',
+                    url: ApiEndpoints.googleMapsSite,
                   ),
                   _AttributionLink(
                     label: 'RainViewer',

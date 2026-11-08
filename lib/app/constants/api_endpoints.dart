@@ -37,9 +37,7 @@ class ApiEndpoints {
   static const double usgsMinLongitude = -87.7;
   static const double usgsMaxLongitude = -82.5;
 
-  static const String mapboxSite = 'https://www.mapbox.com';
-  static const String mapboxAttributionSite =
-      'https://www.mapbox.com/about/maps';
+  static const String googleMapsSite = 'https://www.google.com/maps';
   static const String usgsEarthquakeSite = 'https://earthquake.usgs.gov';
   static const String rainViewerSite = 'https://www.rainviewer.com';
 }

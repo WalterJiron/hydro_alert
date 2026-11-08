@@ -27,16 +27,6 @@ class AppConfig {
     defaultValue: '',
   );
 
-  /// Public Mapbox access token (`pk.`). Provide it with
-  /// `--dart-define=MAPBOX_ACCESS_TOKEN=...` or a local `dart_defines.json`.
-  ///
-  /// When it is missing the map degrades to a configured-off state instead of
-  /// crashing, and the rest of the application keeps working.
-  static const String mapboxAccessToken = String.fromEnvironment(
-    'MAPBOX_ACCESS_TOKEN',
-    defaultValue: '',
-  );
-
   static const bool firebaseEnabled = bool.fromEnvironment(
     'FIREBASE_ENABLED',
     defaultValue: false,
@@ -74,8 +64,6 @@ class AppConfig {
   static bool get hasOpenWeather => openWeatherApiKey.trim().isNotEmpty;
 
   static bool get hasWeather => hasWeatherApi || hasOpenWeather;
-
-  static bool get hasMapbox => mapboxAccessToken.trim().isNotEmpty;
 
   /// Backend base URL ending in `/`, so Dio joins relative paths correctly.
   static String get normalizedApiBaseUrl {

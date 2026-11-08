@@ -19,8 +19,7 @@ class MapLayerBar extends StatelessWidget {
     this.reportCount,
     required this.onToggleEarthquakes,
     required this.onToggleReports,
-    this.onToggleRadar,
-    this.radarEnabled = true,
+    required this.onToggleRadar,
   });
 
   final bool earthquakesSelected;
@@ -28,12 +27,11 @@ class MapLayerBar extends StatelessWidget {
   final bool radarSelected;
   final bool radarLoading;
   final bool reportsEnabled;
-  final bool radarEnabled;
   final int? earthquakeCount;
   final int? reportCount;
   final VoidCallback onToggleEarthquakes;
   final VoidCallback? onToggleReports;
-  final VoidCallback? onToggleRadar;
+  final VoidCallback onToggleRadar;
 
   @override
   Widget build(BuildContext context) {
@@ -71,17 +69,14 @@ class MapLayerBar extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Expanded(
-            child: Tooltip(
-              message: radarEnabled ? 'Radar de lluvia' : 'Mapa sin configurar',
-              child: _LayerSegment(
-                icon: LucideIcons.radar,
-                label: 'Radar',
-                selected: radarSelected,
-                color: AppColors.primary,
-                foreground: AppColors.primaryDark,
-                isLoading: radarLoading,
-                onTap: onToggleRadar,
-              ),
+            child: _LayerSegment(
+              icon: LucideIcons.radar,
+              label: 'Radar',
+              selected: radarSelected,
+              color: AppColors.primary,
+              foreground: AppColors.primaryDark,
+              isLoading: radarLoading,
+              onTap: onToggleRadar,
             ),
           ),
         ],

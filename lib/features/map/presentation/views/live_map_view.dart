@@ -1,28 +1,20 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 import '../../../../app/config/app_config.dart';
 import '../../../../app/constants/api_endpoints.dart';
-import '../../../../app/theme/app_colors.dart';
-import '../../../../app/theme/app_typography.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../../core/utils/external_link.dart';
-import '../../../../shared/molecules/app_card.dart';
 import '../../../../shared/molecules/info_banner.dart';
 import '../../../../shared/motion/app_animated_entrance.dart';
-import '../../../../shared/motion/app_motion.dart';
 import '../../../alerts/domain/entities/seismic_event.dart';
 import '../../../alerts/presentation/viewmodels/alerts_viewmodel.dart';
 import '../../../alerts/presentation/widgets/seismic_event_sheet.dart';
 import '../../../community_reports/domain/entities/community_report.dart';
 import '../../../community_reports/presentation/viewmodels/community_reports_viewmodel.dart';
 import '../../../community_reports/presentation/widgets/community_report_sheet.dart';
-import '../../domain/entities/radar_frame.dart';
 import '../controllers/map_marker_controller.dart';
 import '../controllers/radar_overlay_controller.dart';
 import '../viewmodels/map_viewmodel.dart';
@@ -41,55 +33,26 @@ class LiveMapView extends ConsumerStatefulWidget {
   ConsumerState<LiveMapView> createState() => _LiveMapViewState();
 }
 
-class _LiveMapViewState extends ConsumerState<LiveMapView>
-    with SingleTickerProviderStateMixin {
-  static const double _initialZoom = 7.1;
-  static const double _paddingTop = 60;
-  static const double _paddingBottom = 92;
-  static const Duration _radarFrameDuration = Duration(milliseconds: 620);
-
-  // The viewport is the only source for the initial camera. Setting the
-  // camera again from `onMapCreated` races with the platform view's own
-  // sizing pass and can leave the map off-centre.
-  static final CameraViewportState _initialViewport = CameraViewportState(
-    center: Point(
-      coordinates: Position(
-        ApiEndpoints.nicaraguaCenterLongitude,
-        ApiEndpoints.nicaraguaCenterLatitude,
-      ),
+class _LiveMapViewState extends ConsumerState<LiveMapView> {
+  static const CameraPosition _initialCamera = CameraPosition(
+    target: LatLng(
+      ApiEndpoints.nicaraguaCenterLatitude,
+      ApiEndpoints.nicaraguaCenterLongitude,
     ),
-    zoom: _initialZoom,
-    padding: const EdgeInsets.only(top: _paddingTop, bottom: _paddingBottom),
+    zoom: 7.1,
   );
 
-  static final MbxEdgeInsets _mapPadding = MbxEdgeInsets(
-    top: _paddingTop,
-    bottom: _paddingBottom,
-    left: 0,
-    right: 0,
-  );
+  final MapMarkerController _markerController = MapMarkerController();
+  final RadarOverlayController _radarController = RadarOverlayController();
 
-  MapMarkerController _markerController = MapMarkerController();
-  RadarOverlayController _radarController = RadarOverlayController();
-  final ValueNotifier<RadarFrame?> _activeRadarFrame =
-      ValueNotifier<RadarFrame?>(null);
+  GoogleMapController? _mapController;
+  CameraPosition _cameraPosition = _initialCamera;
 
-  MapboxMap? _mapController;
-  CameraState? _cameraState;
-
-  late final Ticker _radarTicker;
   late final AppLifecycleListener _lifecycleListener;
-
-  List<RadarFrame> _radarFrames = const <RadarFrame>[];
-  int _radarIndex = 0;
-  Duration _lastRadarTick = Duration.zero;
-  int _mapAttempt = 0;
-  bool _mapFailed = false;
 
   @override
   void initState() {
     super.initState();
-    _radarTicker = createTicker(_onRadarTick);
     _lifecycleListener = AppLifecycleListener(
       onResume: () {
         ref.read(mapViewModelProvider.notifier).checkLocationAvailability();
@@ -105,12 +68,8 @@ class _LiveMapViewState extends ConsumerState<LiveMapView>
 
   @override
   void dispose() {
-    _radarTicker.dispose();
     _lifecycleListener.dispose();
-    _markerController.dispose();
-    _radarController.dispose();
-    _activeRadarFrame.dispose();
-    _mapController = null;
+    _mapController?.dispose();
     super.dispose();
   }
 
@@ -140,20 +99,49 @@ class _LiveMapViewState extends ConsumerState<LiveMapView>
         : const <CommunityReport>[];
     final pixelRatio = MediaQuery.devicePixelRatioOf(context);
 
-    _markerController.sync(
+    _requestMarkerIcons(
       events: events,
       reports: visibleReports,
-      userLocation: mapState.userLocation,
+      hasUserLocation: mapState.userLocation != null,
       pixelRatio: pixelRatio,
     );
-    _syncRadar(mapState, reducedMotion: AppMotion.isReduced(context));
-
-    final mapUsable = AppConfig.hasMapbox && !_mapFailed;
 
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: _buildMapSurface(context)),
+          GoogleMap(
+            initialCameraPosition: _initialCamera,
+            onMapCreated: (controller) {
+              _mapController = controller;
+            },
+            onCameraMove: (position) => _cameraPosition = position,
+            markers: _markerController.buildMarkers(
+              events: events,
+              reports: visibleReports,
+              userLocation: mapState.userLocation,
+              pixelRatio: pixelRatio,
+              onReportTap: _showReportSheet,
+              onSeismicTap: (event) => showSeismicEventSheet(context, event),
+            ),
+            tileOverlays: mapState.hasRadar
+                ? {
+                    _radarController.overlayFor(
+                      mapState.radarFrame!.tileUrlTemplate,
+                    ),
+                  }
+                : const <TileOverlay>{},
+            minMaxZoomPreference: const MinMaxZoomPreference(5.5, 16),
+            rotateGesturesEnabled: false,
+            tiltGesturesEnabled: false,
+            compassEnabled: false,
+            mapToolbarEnabled: false,
+            zoomControlsEnabled: false,
+            myLocationEnabled: false,
+            myLocationButtonEnabled: false,
+            // The map is shifted with padding so the Google logo and the
+            // camera centre stay clear of the floating controls.
+            padding: const EdgeInsets.only(top: 60, bottom: 92),
+          ),
           SafeArea(
             minimum: const EdgeInsets.fromLTRB(12, 8, 12, 12),
             bottom: false,
@@ -174,19 +162,12 @@ class _LiveMapViewState extends ConsumerState<LiveMapView>
                   offset: const Offset(0.12, 0),
                   child: Align(
                     alignment: Alignment.centerRight,
-                    child: IgnorePointer(
-                      ignoring: !mapUsable,
-                      child: AnimatedOpacity(
-                        opacity: mapUsable ? 1 : 0.45,
-                        duration: AppMotion.resolve(context, AppMotion.quick),
-                        child: MapControls(
-                          isLocating: mapState.isLocating,
-                          onZoomIn: () => _zoomBy(1),
-                          onZoomOut: () => _zoomBy(-1),
-                          onLocate: _locateUser,
-                          onRefresh: _refreshData,
-                        ),
-                      ),
+                    child: MapControls(
+                      isLocating: mapState.isLocating,
+                      onZoomIn: () => _zoomBy(1),
+                      onZoomOut: () => _zoomBy(-1),
+                      onLocate: _locateUser,
+                      onRefresh: _refreshData,
                     ),
                   ),
                 ),
@@ -227,17 +208,9 @@ class _LiveMapViewState extends ConsumerState<LiveMapView>
                     offset: const Offset(0.08, 0),
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: ValueListenableBuilder<RadarFrame?>(
-                        valueListenable: _activeRadarFrame,
-                        builder: (context, frame, _) {
-                          return MapRadarAttribution(
-                            frame: frame,
-                            onRainViewer: () async {
-                              await openExternalUrl(
-                                ApiEndpoints.rainViewerSite,
-                              );
-                            },
-                          );
+                      child: MapRadarAttribution(
+                        onRainViewer: () async {
+                          await openExternalUrl(ApiEndpoints.rainViewerSite);
                         },
                       ),
                     ),
@@ -252,7 +225,6 @@ class _LiveMapViewState extends ConsumerState<LiveMapView>
                     radarSelected: mapState.radarEnabled,
                     radarLoading: mapState.isLoadingRadar,
                     reportsEnabled: AppConfig.hasBackend,
-                    radarEnabled: mapUsable,
                     earthquakeCount: alerts.value?.length,
                     reportCount: reports.value?.length,
                     onToggleEarthquakes: () => ref
@@ -263,7 +235,7 @@ class _LiveMapViewState extends ConsumerState<LiveMapView>
                               .read(mapViewModelProvider.notifier)
                               .toggleReports()
                         : null,
-                    onToggleRadar: mapUsable ? _toggleRadar : null,
+                    onToggleRadar: _toggleRadar,
                   ),
                 ),
               ],
@@ -274,194 +246,6 @@ class _LiveMapViewState extends ConsumerState<LiveMapView>
     );
   }
 
-  Widget _buildMapSurface(BuildContext context) {
-    if (!AppConfig.hasMapbox || _mapFailed) {
-      return _MapUnavailable(
-        configured: AppConfig.hasMapbox,
-        onRetry: AppConfig.hasMapbox ? _retryMap : null,
-      );
-    }
-
-    return MapWidget(
-      key: ValueKey<int>(_mapAttempt),
-      styleUri: MapboxStyles.OUTDOORS,
-      viewport: _initialViewport,
-      onMapCreated: _onMapCreated,
-      onStyleLoadedListener: (_) {
-        _radarController.setStyleReady(true);
-      },
-      onCameraChangeListener: (event) {
-        _cameraState = event.cameraState;
-      },
-      onMapLoadErrorListener: (event) {
-        if (!mounted) {
-          return;
-        }
-        setState(() => _mapFailed = true);
-      },
-    );
-  }
-
-  void _onMapCreated(MapboxMap map) {
-    _mapController = map;
-    _cameraState = null;
-    _markerController.attach(
-      map,
-      onReportTap: _showReportSheet,
-      onSeismicTap: (event) => showSeismicEventSheet(context, event),
-    );
-    _radarController.attach(map);
-    _radarController.setBelowLayerId(_markerController.annotationBaseLayerId);
-    unawaited(_configureMap(map));
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  Future<void> _configureMap(MapboxMap map) async {
-    try {
-      await map.gestures.updateSettings(
-        GesturesSettings(
-          rotateEnabled: false,
-          pitchEnabled: false,
-          scrollEnabled: true,
-          pinchToZoomEnabled: true,
-          doubleTapToZoomInEnabled: true,
-          doubleTouchToZoomOutEnabled: true,
-          quickZoomEnabled: false,
-        ),
-      );
-      await map.logo.updateSettings(
-        LogoSettings(
-          enabled: true,
-          position: OrnamentPosition.BOTTOM_LEFT,
-          marginLeft: 12,
-          marginBottom: 96,
-        ),
-      );
-      await map.attribution.updateSettings(
-        AttributionSettings(
-          enabled: true,
-          position: OrnamentPosition.BOTTOM_RIGHT,
-          marginRight: 12,
-          marginBottom: 142,
-          clickable: true,
-        ),
-      );
-      await map.compass.updateSettings(CompassSettings(enabled: false));
-      await map.scaleBar.updateSettings(ScaleBarSettings(enabled: false));
-      await map.setBounds(
-        CameraBoundsOptions(
-          minZoom: 5.5,
-          maxZoom: 16,
-          minPitch: 0,
-          maxPitch: 0,
-        ),
-      );
-    } catch (_) {
-      // The map keeps the SDK defaults when a setting is not supported.
-    }
-  }
-
-  void _syncRadar(MapViewState state, {required bool reducedMotion}) {
-    final frames = state.radarFrames;
-    if (!identical(frames, _radarFrames)) {
-      _radarFrames = frames;
-      _radarIndex = 0;
-      _lastRadarTick = Duration.zero;
-    }
-
-    if (!state.hasRadar || frames.isEmpty) {
-      _radarController.sync(enabled: false, frames: frames, activeIndex: 0);
-      _stopRadarLoop();
-      _publishRadarFrame(null);
-      return;
-    }
-
-    if (reducedMotion) {
-      _radarIndex = frames.length - 1;
-      _lastRadarTick = Duration.zero;
-      _stopRadarLoop();
-    } else if (_radarIndex >= frames.length) {
-      _radarIndex = frames.length - 1;
-    }
-
-    _radarController.sync(
-      enabled: true,
-      frames: frames,
-      activeIndex: _radarIndex,
-    );
-    _publishRadarFrame(frames[_radarIndex]);
-    if (!reducedMotion) {
-      _startRadarLoop();
-    }
-  }
-
-  void _startRadarLoop() {
-    if (_radarTicker.isTicking) {
-      return;
-    }
-    _lastRadarTick = Duration.zero;
-    _radarTicker.start();
-  }
-
-  void _stopRadarLoop() {
-    if (_radarTicker.isTicking) {
-      _radarTicker.stop();
-    }
-    _lastRadarTick = Duration.zero;
-  }
-
-  void _onRadarTick(Duration elapsed) {
-    if (_radarFrames.isEmpty) {
-      _stopRadarLoop();
-      return;
-    }
-
-    final elapsedMs = (elapsed - _lastRadarTick).inMilliseconds;
-    final steps = elapsedMs ~/ _radarFrameDuration.inMilliseconds;
-    if (steps <= 0) {
-      return;
-    }
-
-    _lastRadarTick = elapsed;
-    final next = (_radarIndex + steps) % _radarFrames.length;
-    _radarIndex = next;
-    _radarController.sync(
-      enabled: true,
-      frames: _radarFrames,
-      activeIndex: next,
-    );
-    _activeRadarFrame.value = _radarFrames[next];
-  }
-
-  void _publishRadarFrame(RadarFrame? frame) {
-    if (identical(_activeRadarFrame.value, frame)) {
-      return;
-    }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _activeRadarFrame.value = frame;
-      }
-    });
-  }
-
-  void _retryMap() {
-    _markerController.dispose();
-    _radarController.dispose();
-    _markerController = MapMarkerController();
-    _radarController = RadarOverlayController();
-    _mapController = null;
-    _cameraState = null;
-    _activeRadarFrame.value = null;
-    _radarIndex = 0;
-    _lastRadarTick = Duration.zero;
-    setState(() {
-      _mapFailed = false;
-      _mapAttempt++;
-    });
-  }
-
   bool _showLocationBanner(MapViewState state) {
     final availability = state.locationAvailability;
     return availability != null &&
@@ -469,22 +253,35 @@ class _LiveMapViewState extends ConsumerState<LiveMapView>
         !state.locationBannerDismissed;
   }
 
+  void _requestMarkerIcons({
+    required List<SeismicEvent> events,
+    required List<CommunityReport> reports,
+    required bool hasUserLocation,
+    required double pixelRatio,
+  }) {
+    _markerController.requestMissing(
+      events: events,
+      reports: reports,
+      hasUserLocation: hasUserLocation,
+      pixelRatio: pixelRatio,
+      onReady: () {
+        if (!mounted) {
+          return;
+        }
+        setState(() {});
+      },
+    );
+  }
+
   void _zoomBy(double delta) {
     final controller = _mapController;
     if (controller == null) {
       return;
     }
-    final current = _cameraState?.zoom ?? _initialZoom;
-    final zoom = (current + delta).clamp(5.5, 16.0).toDouble();
-    unawaited(
-      controller.easeTo(
-        CameraOptions(zoom: zoom),
-        MapAnimationOptions(
-          duration: AppMotion.resolve(
-            context,
-            AppMotion.standard,
-          ).inMilliseconds,
-        ),
+    final zoom = (_cameraPosition.zoom + delta).clamp(5.5, 16.0).toDouble();
+    controller.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(target: _cameraPosition.target, zoom: zoom),
       ),
     );
   }
@@ -502,28 +299,16 @@ class _LiveMapViewState extends ConsumerState<LiveMapView>
     final location = await notifier.locateUser();
     final controller = _mapController;
     if (location != null && mounted && controller != null) {
-      await controller.easeTo(
-        CameraOptions(
-          center: Point(
-            coordinates: Position(location.longitude, location.latitude),
-          ),
-          zoom: 12.5,
-          padding: _mapPadding,
-        ),
-        MapAnimationOptions(
-          duration: AppMotion.resolve(
-            context,
-            AppMotion.emphasized,
-          ).inMilliseconds,
+      await controller.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(location.latitude, location.longitude),
+          12.5,
         ),
       );
     }
   }
 
   Future<void> _toggleRadar() async {
-    if (!AppConfig.hasMapbox || _mapFailed) {
-      return;
-    }
     await ref.read(mapViewModelProvider.notifier).toggleRadar();
     if (!mounted) {
       return;
@@ -552,64 +337,5 @@ class _LiveMapViewState extends ConsumerState<LiveMapView>
 
   void _showReportSheet(CommunityReport report) {
     showCommunityReportSheet(context, report, compact: true);
-  }
-}
-
-class _MapUnavailable extends StatelessWidget {
-  const _MapUnavailable({required this.configured, this.onRetry});
-
-  final bool configured;
-  final VoidCallback? onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return ColoredBox(
-      color: AppColors.surfaceMuted,
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(28),
-          child: AppCard(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    configured ? LucideIcons.cloudOff : LucideIcons.mapPinOff,
-                    size: 34,
-                    color: AppColors.textMuted,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    configured
-                        ? 'El mapa no pudo cargarse'
-                        : 'Mapa no disponible',
-                    textAlign: TextAlign.center,
-                    style: AppTypography.titleSmall,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    configured
-                        ? 'Revisa tu conexión e inténtalo de nuevo.'
-                        : 'Esta compilación no incluye la configuración del '
-                              'mapa. Las demás secciones siguen funcionando.',
-                    textAlign: TextAlign.center,
-                    style: AppTypography.bodySmall,
-                  ),
-                  if (onRetry != null) ...[
-                    const SizedBox(height: 14),
-                    FilledButton.tonalIcon(
-                      onPressed: onRetry,
-                      icon: const Icon(LucideIcons.refreshCw, size: 16),
-                      label: const Text('Reintentar'),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

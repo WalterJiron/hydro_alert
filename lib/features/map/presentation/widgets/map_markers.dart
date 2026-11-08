@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_colors.dart';
@@ -12,16 +13,16 @@ import '../../../community_reports/domain/entities/community_report.dart';
 import '../../../community_reports/domain/entities/report_category.dart';
 import '../../../community_reports/presentation/widgets/report_category_visuals.dart';
 
-/// Paints the custom map pins into PNG bitmaps for Mapbox annotations.
+/// Paints the custom map pins into bitmaps that Google Maps can display.
 ///
-/// Every pin variant is rendered once with [ui.Canvas] and cached at the
-/// device pixel ratio so it stays sharp on high-density screens. The map
-/// controller scales each image back down with `iconSize = 1 / pixelRatio`.
+/// Google Maps requires a [BitmapDescriptor] for each marker, so every pin
+/// variant is rendered once with [ui.Canvas] and cached. The bitmaps are drawn
+/// at the device pixel ratio to stay sharp on high-density screens.
 class MapMarkerIcons {
   MapMarkerIcons._();
 
-  static final Map<String, Uint8List> _cache = {};
-  static final Map<String, Future<Uint8List>> _pending = {};
+  static final Map<String, BitmapDescriptor> _cache = {};
+  static final Map<String, Future<BitmapDescriptor>> _pending = {};
 
   static String seismicKey(SeismicEvent event, double pixelRatio) =>
       'seismic-${event.magnitudeLabel}-${_ratioKey(pixelRatio)}';
@@ -32,26 +33,32 @@ class MapMarkerIcons {
   static String userLocationKey(double pixelRatio) =>
       'user-location-${_ratioKey(pixelRatio)}';
 
-  static Uint8List? cached(String key) => _cache[key];
+  static BitmapDescriptor? cached(String key) => _cache[key];
 
-  static Future<Uint8List> seismic(SeismicEvent event, double pixelRatio) {
+  static Future<BitmapDescriptor> seismic(
+    SeismicEvent event,
+    double pixelRatio,
+  ) {
     final key = seismicKey(event, pixelRatio);
     return _resolve(key, () => _paintSeismicPin(event, pixelRatio));
   }
 
-  static Future<Uint8List> report(CommunityReport report, double pixelRatio) {
+  static Future<BitmapDescriptor> report(
+    CommunityReport report,
+    double pixelRatio,
+  ) {
     final key = reportKey(report, pixelRatio);
     return _resolve(key, () => _paintReportPin(report.category, pixelRatio));
   }
 
-  static Future<Uint8List> userLocation(double pixelRatio) {
+  static Future<BitmapDescriptor> userLocation(double pixelRatio) {
     final key = userLocationKey(pixelRatio);
     return _resolve(key, () => _paintUserLocation(pixelRatio));
   }
 
-  static Future<Uint8List> _resolve(
+  static Future<BitmapDescriptor> _resolve(
     String key,
-    Future<Uint8List> Function() build,
+    Future<BitmapDescriptor> Function() build,
   ) {
     final cached = _cache[key];
     if (cached != null) {
@@ -60,16 +67,16 @@ class MapMarkerIcons {
 
     return _pending.putIfAbsent(key, () async {
       try {
-        final bytes = await build();
-        _cache[key] = bytes;
-        return bytes;
+        final descriptor = await build();
+        _cache[key] = descriptor;
+        return descriptor;
       } finally {
         unawaited(_pending.remove(key));
       }
     });
   }
 
-  static Future<Uint8List> _paintSeismicPin(
+  static Future<BitmapDescriptor> _paintSeismicPin(
     SeismicEvent event,
     double pixelRatio,
   ) async {
@@ -77,7 +84,9 @@ class MapMarkerIcons {
     final pinWidth = isStrong ? 46.0 : 40.0;
     final pinHeight = pinWidth * 1.22;
 
-    return _record(Size(pinWidth, pinHeight), pixelRatio, (canvas) {
+    final bytes = await _record(Size(pinWidth, pinHeight), pixelRatio, (
+      canvas,
+    ) {
       _paintPinBody(
         canvas,
         size: Size(pinWidth, pinHeight),
@@ -98,16 +107,20 @@ class MapMarkerIcons {
         fontSize: pinWidth * 0.24,
       );
     });
+
+    return _descriptor(bytes, pixelRatio);
   }
 
-  static Future<Uint8List> _paintReportPin(
+  static Future<BitmapDescriptor> _paintReportPin(
     ReportCategory category,
     double pixelRatio,
   ) async {
     const pinWidth = 42.0;
     const pinHeight = 51.0;
 
-    return _record(const Size(pinWidth, pinHeight), pixelRatio, (canvas) {
+    final bytes = await _record(const Size(pinWidth, pinHeight), pixelRatio, (
+      canvas,
+    ) {
       _paintPinBody(
         canvas,
         size: const Size(pinWidth, pinHeight),
@@ -121,12 +134,14 @@ class MapMarkerIcons {
         center: const Offset(pinWidth / 2, pinWidth * 0.44),
       );
     });
+
+    return _descriptor(bytes, pixelRatio);
   }
 
-  static Future<Uint8List> _paintUserLocation(double pixelRatio) async {
+  static Future<BitmapDescriptor> _paintUserLocation(double pixelRatio) async {
     const size = 34.0;
 
-    return _record(const Size(size, size), pixelRatio, (canvas) {
+    final bytes = await _record(const Size(size, size), pixelRatio, (canvas) {
       const center = Offset(size / 2, size / 2);
 
       canvas.drawCircle(
@@ -149,6 +164,8 @@ class MapMarkerIcons {
           ..strokeWidth = 2.5,
       );
     });
+
+    return _descriptor(bytes, pixelRatio);
   }
 
   static Future<Uint8List> _record(
@@ -174,6 +191,10 @@ class MapMarkerIcons {
       throw StateError('No se pudo generar el icono del mapa.');
     }
     return data.buffer.asUint8List();
+  }
+
+  static BitmapDescriptor _descriptor(Uint8List bytes, double pixelRatio) {
+    return BitmapDescriptor.bytes(bytes, imagePixelRatio: pixelRatio);
   }
 
   static void _paintPinBody(

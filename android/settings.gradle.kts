@@ -23,13 +23,4 @@ plugins {
     id("org.jetbrains.kotlin.android") version "2.3.20" apply false
 }
 
-// mapbox_maps_flutter 3.34.2 assumes AGP 9 built-in Kotlin, but Flutter
-// disables it (android.builtInKotlin=false). Apply the standalone Kotlin
-// plugin to that subproject so its `kotlin { }` block resolves.
-gradle.beforeProject {
-    if (name == "mapbox_maps_flutter_mobile") {
-        pluginManager.apply("org.jetbrains.kotlin.android")
-    }
-}
-
 include(":app")
