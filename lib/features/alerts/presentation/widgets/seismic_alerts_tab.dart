@@ -24,7 +24,7 @@ class SeismicAlertsTab extends ConsumerWidget {
       onRefresh: () => ref.read(alertsViewModelProvider.notifier).refresh(),
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         children: [
           const AppAnimatedEntrance(
             order: 0,

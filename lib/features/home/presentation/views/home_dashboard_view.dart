@@ -58,7 +58,7 @@ class HomeDashboardView extends ConsumerWidget {
         onRefresh: () => _refreshAll(ref),
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
           children: [
             AppAnimatedEntrance(
               order: 0,

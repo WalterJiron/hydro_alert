@@ -28,7 +28,7 @@ class WeatherAlertsTab extends ConsumerWidget {
       onRefresh: () => ref.read(weatherViewModelProvider.notifier).refresh(),
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         children: [
           if (!AppConfig.hasWeather)
             const AppAnimatedEntrance(

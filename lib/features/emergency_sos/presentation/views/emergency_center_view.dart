@@ -19,7 +19,7 @@ class EmergencyCenterView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Emergencia')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
         children: [
           const AppAnimatedEntrance(
             order: 0,
