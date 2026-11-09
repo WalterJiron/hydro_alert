@@ -5,8 +5,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/config/app_config.dart';
 import '../../../../app/constants/api_endpoints.dart';
+import '../../../../app/theme/app_colors.dart';
 import '../../../../core/services/location_service.dart';
-import '../../../../core/utils/external_link.dart';
 import '../../../../shared/molecules/info_banner.dart';
 import '../../../../shared/motion/app_animated_entrance.dart';
 import '../../../alerts/domain/entities/seismic_event.dart';
@@ -23,7 +23,6 @@ import '../widgets/map_controls.dart';
 import '../widgets/map_layer_bar.dart';
 import '../widgets/map_legend_sheet.dart';
 import '../widgets/map_location_banner.dart';
-import '../widgets/map_radar_attribution.dart';
 import '../widgets/map_top_bar.dart';
 
 class LiveMapView extends ConsumerStatefulWidget {
@@ -98,6 +97,10 @@ class _LiveMapViewState extends ConsumerState<LiveMapView> {
         ? (reports.value ?? const <CommunityReport>[])
         : const <CommunityReport>[];
     final pixelRatio = MediaQuery.devicePixelRatioOf(context);
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    // The wave navbar height is (barHeight: 54 + protrusion: 7) + bottomInset = 61 + bottomInset.
+    // We add 16px of floating margin so MapLayerBar floats cleanly above the wave:
+    final layerBarBottomPadding = bottomInset + 77.0;
 
     _requestMarkerIcons(
       events: events,
@@ -140,10 +143,10 @@ class _LiveMapViewState extends ConsumerState<LiveMapView> {
             myLocationButtonEnabled: false,
             // The map is shifted with padding so the Google logo and the
             // camera centre stay clear of the floating controls.
-            padding: const EdgeInsets.only(top: 60, bottom: 92),
+            padding: EdgeInsets.only(top: 60, bottom: layerBarBottomPadding + 8),
           ),
           SafeArea(
-            minimum: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+            minimum: EdgeInsets.fromLTRB(14, 8, 14, layerBarBottomPadding),
             bottom: false,
             child: Column(
               children: [
@@ -153,9 +156,49 @@ class _LiveMapViewState extends ConsumerState<LiveMapView> {
                   child: MapTopBar(
                     alertsLoading: alerts.isLoading,
                     alertsAvailable: alerts.hasValue,
+                    alertsCount: alerts.value?.length,
                     onOpenLegend: _openLegend,
                   ),
                 ),
+                if (mapState.hasRadar) ...[
+                  const SizedBox(height: 6),
+                  AppAnimatedEntrance(
+                    order: 1,
+                    offset: const Offset(0, -0.05),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryDark.withValues(alpha: 0.90),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.12),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(LucideIcons.radar, size: 13, color: Colors.white),
+                          SizedBox(width: 6),
+                          Text(
+                            'Radar de lluvia activo (RainViewer)',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
                 const Spacer(),
                 AppAnimatedEntrance(
                   order: 1,
@@ -199,19 +242,6 @@ class _LiveMapViewState extends ConsumerState<LiveMapView> {
                         onDismiss: () => ref
                             .read(mapViewModelProvider.notifier)
                             .dismissLocationBanner(),
-                      ),
-                    ),
-                  ),
-                if (mapState.hasRadar)
-                  AppAnimatedEntrance(
-                    order: 2,
-                    offset: const Offset(0.08, 0),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: MapRadarAttribution(
-                        onRainViewer: () async {
-                          await openExternalUrl(ApiEndpoints.rainViewerSite);
-                        },
                       ),
                     ),
                   ),

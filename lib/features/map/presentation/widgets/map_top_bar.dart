@@ -1,4 +1,7 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_colors.dart';
@@ -6,59 +9,90 @@ import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/atoms/app_logo.dart';
 import '../../../../shared/atoms/status_indicator.dart';
 
-/// Floating header of the map with the app identity, the USGS status and the
-/// entry point to the legend.
+/// Floating header of the map with app brand, USGS live status, and legend entry.
 class MapTopBar extends StatelessWidget {
   const MapTopBar({
     super.key,
     required this.alertsLoading,
     required this.alertsAvailable,
     required this.onOpenLegend,
+    this.alertsCount,
   });
 
   final bool alertsLoading;
   final bool alertsAvailable;
   final VoidCallback onOpenLegend;
+  final int? alertsCount;
 
   @override
   Widget build(BuildContext context) {
     final statusLabel = alertsLoading
-        ? 'USGS actualizando'
-        : (alertsAvailable ? 'USGS' : 'USGS no disponible');
+        ? 'Sincronizando'
+        : (alertsAvailable ? 'USGS' : 'Sin conexión');
 
-    return Material(
-      color: AppColors.mapPanel,
-      borderRadius: BorderRadius.circular(16),
-      clipBehavior: Clip.antiAlias,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(10, 4, 4, 4),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
-          children: [
-            const AppLogo(size: 22),
-            const SizedBox(width: 8),
-            Text('Nicaragua', style: AppTypography.titleSmall),
-            const SizedBox(width: 12),
-            StatusIndicator(
-              label: statusLabel,
-              color: alertsAvailable ? AppColors.info : AppColors.warning,
-              isActive: alertsAvailable,
-            ),
-            const Spacer(),
-            IconButton(
-              onPressed: onOpenLegend,
-              tooltip: 'Leyenda del mapa',
-              icon: const Icon(LucideIcons.info, size: 19),
-              color: AppColors.textSecondary,
-              style: IconButton.styleFrom(
-                minimumSize: const Size(40, 40),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(10, 5, 5, 5),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.94),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.border.withValues(alpha: 0.8)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
               ),
-            ),
-          ],
+            ],
+          ),
+          child: Row(
+            children: [
+              const AppLogo(size: 24),
+              const SizedBox(width: 8),
+              Text('Nicaragua', style: AppTypography.titleSmall),
+              const SizedBox(width: 10),
+              StatusIndicator(
+                label: statusLabel,
+                color: alertsAvailable ? AppColors.info : AppColors.warning,
+                isActive: alertsAvailable,
+              ),
+              const Spacer(),
+              if (alertsCount != null && alertsCount! > 0) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.primarySoft,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '$alertsCount sismos',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryDark,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+              ],
+              IconButton(
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  onOpenLegend();
+                },
+                tooltip: 'Leyenda del mapa',
+                icon: const Icon(LucideIcons.info, size: 18),
+                color: AppColors.textSecondary,
+                style: IconButton.styleFrom(
+                  minimumSize: const Size(36, 36),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

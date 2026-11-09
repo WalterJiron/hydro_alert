@@ -1,12 +1,14 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
-import '../../../../shared/molecules/app_card.dart';
 import '../../../../shared/motion/app_motion.dart';
 
-/// Segmented layer switcher shown over the map.
+/// Floating segmented layer selector for earthquakes, community reports, and radar.
 class MapLayerBar extends StatelessWidget {
   const MapLayerBar({
     super.key,
@@ -35,51 +37,69 @@ class MapLayerBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      padding: const EdgeInsets.all(6),
-      child: Row(
-        children: [
-          Expanded(
-            child: _LayerSegment(
-              icon: LucideIcons.activity,
-              label: 'Sismos',
-              count: earthquakeCount,
-              selected: earthquakesSelected,
-              color: AppColors.info,
-              foreground: AppColors.primaryDark,
-              onTap: onToggleEarthquakes,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Tooltip(
-              message: reportsEnabled
-                  ? 'Reportes comunitarios'
-                  : 'Servicio de reportes sin configurar',
-              child: _LayerSegment(
-                icon: LucideIcons.clipboardList,
-                label: 'Reportes',
-                count: reportsEnabled ? reportCount : null,
-                selected: reportsSelected,
-                color: AppColors.warning,
-                foreground: AppColors.warningDark,
-                onTap: onToggleReports,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(22),
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          padding: const EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.94),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: AppColors.border.withValues(alpha: 0.8)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
               ),
-            ),
+            ],
           ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: _LayerSegment(
-              icon: LucideIcons.radar,
-              label: 'Radar',
-              selected: radarSelected,
-              color: AppColors.primary,
-              foreground: AppColors.primaryDark,
-              isLoading: radarLoading,
-              onTap: onToggleRadar,
-            ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _LayerSegment(
+                  icon: LucideIcons.activity,
+                  label: 'Sismos',
+                  count: earthquakeCount,
+                  selected: earthquakesSelected,
+                  color: AppColors.info,
+                  foreground: AppColors.primaryDark,
+                  onTap: onToggleEarthquakes,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Tooltip(
+                  message: reportsEnabled
+                      ? 'Reportes comunitarios'
+                      : 'Servicio de reportes sin configurar',
+                  child: _LayerSegment(
+                    icon: LucideIcons.clipboardList,
+                    label: 'Reportes',
+                    count: reportsEnabled ? reportCount : null,
+                    selected: reportsSelected,
+                    color: AppColors.warning,
+                    foreground: AppColors.warningDark,
+                    onTap: onToggleReports,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: _LayerSegment(
+                  icon: LucideIcons.radar,
+                  label: 'Radar',
+                  selected: radarSelected,
+                  color: AppColors.primary,
+                  foreground: AppColors.primaryDark,
+                  isLoading: radarLoading,
+                  onTap: onToggleRadar,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -120,39 +140,45 @@ class _LayerSegment extends StatelessWidget {
       enabled: isEnabled,
       label: label,
       child: AnimatedOpacity(
-        opacity: isEnabled ? 1 : 0.55,
+        opacity: isEnabled ? 1 : 0.45,
         duration: AppMotion.resolve(context, AppMotion.quick),
         child: AnimatedContainer(
           duration: AppMotion.resolve(context, AppMotion.quick),
           curve: AppMotion.curve,
           decoration: BoxDecoration(
             color: isSelected
-                ? color.withValues(alpha: 0.12)
+                ? color.withValues(alpha: 0.14)
                 : Colors.transparent,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isSelected
-                  ? color.withValues(alpha: 0.5)
-                  : AppColors.border,
+                  ? color.withValues(alpha: 0.45)
+                  : Colors.transparent,
+              width: 1,
             ),
           ),
           child: Material(
             color: Colors.transparent,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             clipBehavior: Clip.antiAlias,
             child: InkWell(
-              onTap: isLoading ? null : onTap,
+              onTap: isEnabled && !isLoading
+                  ? () {
+                      HapticFeedback.selectionClick();
+                      onTap?.call();
+                    }
+                  : null,
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 10,
+                  horizontal: 6,
+                  vertical: 9,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     AnimatedSwitcher(
                       duration: AppMotion.resolve(context, AppMotion.quick),
-                      switchInCurve: AppMotion.curve,
                       child: isLoading
                           ? SizedBox(
                               key: const ValueKey('loading'),
@@ -166,50 +192,46 @@ class _LayerSegment extends StatelessWidget {
                           : Icon(
                               icon,
                               key: ValueKey(icon),
-                              size: 16,
+                              size: 15,
                               color: effectiveForeground,
                             ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 5),
                     Flexible(
                       child: Text(
                         label,
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.labelSmall.copyWith(
+                          fontSize: 11.5,
                           color: effectiveForeground,
                           fontWeight: isSelected
-                              ? FontWeight.w800
-                              : FontWeight.w600,
+                              ? FontWeight.w700
+                              : FontWeight.w500,
                         ),
                       ),
                     ),
                     if (count != null && count! > 0) ...[
-                      const SizedBox(width: 5),
+                      const SizedBox(width: 4),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 5,
-                          vertical: 1,
+                          vertical: 1.5,
                         ),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? color.withValues(alpha: 0.2)
+                              ? color.withValues(alpha: 0.22)
                               : AppColors.surfaceMuted,
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        child: AnimatedSwitcher(
-                          duration: AppMotion.resolve(context, AppMotion.quick),
-                          switchInCurve: AppMotion.curve,
-                          child: Text(
-                            '$count',
-                            key: ValueKey(count),
-                            style: TextStyle(
-                              fontSize: 9.5,
-                              height: 1.2,
-                              fontWeight: FontWeight.w800,
-                              color: isSelected
-                                  ? foreground
-                                  : AppColors.textMuted,
-                            ),
+                        child: Text(
+                          '$count',
+                          style: TextStyle(
+                            fontSize: 9,
+                            height: 1.1,
+                            fontWeight: FontWeight.w800,
+                            color: isSelected
+                                ? foreground
+                                : AppColors.textMuted,
                           ),
                         ),
                       ),

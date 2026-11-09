@@ -1,10 +1,12 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_colors.dart';
-import '../../../../shared/molecules/app_card.dart';
 
-/// Floating zoom, locate and refresh controls of the map.
+/// Floating zoom, locate, and refresh controls for the map.
 class MapControls extends StatelessWidget {
   const MapControls({
     super.key,
@@ -23,39 +25,69 @@ class MapControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      padding: const EdgeInsets.all(4),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _MapControlButton(
-            icon: LucideIcons.plus,
-            tooltip: 'Acercar',
-            onPressed: onZoomIn,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.94),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.border.withValues(alpha: 0.8)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 14,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          _MapControlButton(
-            icon: LucideIcons.minus,
-            tooltip: 'Alejar',
-            onPressed: onZoomOut,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _MapControlButton(
+                icon: LucideIcons.plus,
+                tooltip: 'Acercar',
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  onZoomIn();
+                },
+              ),
+              _MapControlButton(
+                icon: LucideIcons.minus,
+                tooltip: 'Alejar',
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  onZoomOut();
+                },
+              ),
+              Container(
+                width: 20,
+                height: 1,
+                color: AppColors.border.withValues(alpha: 0.8),
+                margin: const EdgeInsets.symmetric(vertical: 3),
+              ),
+              _MapControlButton(
+                icon: LucideIcons.locateFixed,
+                tooltip: 'Centrar en mi ubicación',
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  onLocate();
+                },
+                isLoading: isLocating,
+              ),
+              _MapControlButton(
+                icon: LucideIcons.refreshCw,
+                tooltip: 'Actualizar datos',
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  onRefresh();
+                },
+              ),
+            ],
           ),
-          Container(
-            width: 22,
-            height: 1,
-            color: AppColors.border,
-            margin: const EdgeInsets.symmetric(vertical: 2),
-          ),
-          _MapControlButton(
-            icon: LucideIcons.locateFixed,
-            tooltip: 'Centrar en mi ubicación',
-            onPressed: onLocate,
-            isLoading: isLocating,
-          ),
-          _MapControlButton(
-            icon: LucideIcons.refreshCw,
-            tooltip: 'Actualizar datos',
-            onPressed: onRefresh,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -81,14 +113,17 @@ class _MapControlButton extends StatelessWidget {
       tooltip: tooltip,
       icon: isLoading
           ? const SizedBox(
-              width: 17,
-              height: 17,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.primary,
+              ),
             )
-          : Icon(icon, size: 19),
+          : Icon(icon, size: 18),
       color: AppColors.textSecondary,
       style: IconButton.styleFrom(
-        minimumSize: const Size(42, 42),
+        minimumSize: const Size(40, 40),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
     );
