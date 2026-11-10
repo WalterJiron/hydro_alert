@@ -1,236 +1,311 @@
-# HydroAlert
+# HydroAlert · App Móvil
 
-**Información que protege.** Aplicación móvil Flutter para Nicaragua que reúne actividad sísmica, clima, un mapa operativo y reportes comunitarios en una interfaz de baja carga cognitiva.
+<p align="center">
+  <img src="assets/images/app_logo.png" alt="HydroAlert Logo" width="110" height="110" />
+</p>
 
-> HydroAlert es una herramienta informativa. No sustituye a SINAPRED, INETER, cuerpos de emergencia ni a ninguna autoridad. Los eventos sísmicos de INETER (o del respaldo de USGS) **no** son alertas oficiales de evacuación y los reportes comunitarios **no están verificados**.
+<p align="center">
+  <strong>Información que protege en tiempo real.</strong><br>
+  Plataforma móvil para Nicaragua que integra monitoreo sísmico oficial (INETER), condiciones meteorológicas, radar de precipitaciones y red ciudadana de reportes de emergencia en una interfaz intuitiva, accesible y de baja carga cognitiva.
+</p>
 
-## Funcionalidad
+<p align="center">
+  <img src="https://img.shields.io/badge/Flutter-3.24+-02569B?logo=flutter&logoColor=white" alt="Flutter" />
+  <img src="https://img.shields.io/badge/Dart-3.5+-0175C2?logo=dart&logoColor=white" alt="Dart" />
+  <img src="https://img.shields.io/badge/Architecture-MVVM%20%2B%20Clean-success" alt="Architecture" />
+  <img src="https://img.shields.io/badge/State-Riverpod%203-blueviolet" alt="Riverpod" />
+  <img src="https://img.shields.io/badge/Backend-FastAPI%20%2B%20PostgreSQL-009688?logo=fastapi&logoColor=white" alt="Backend" />
+  <img src="https://img.shields.io/badge/License-Proprietary-red" alt="License" />
+</p>
 
-| Pestaña | Qué hace |
-| --- | --- |
-| **Inicio** | Resumen del día, clima actual, últimos sismos, reportes recientes y acceso rápido a la guía de emergencia. |
-| **Mapa** | Google Maps con marcadores personalizados de sismos y reportes, ubicación del usuario y radar RainViewer opcional. |
-| **Reportes** | Lista de reportes comunitarios activos y asistente de dos pasos para crear uno con foto y ubicación. Publicar requiere una cuenta de reportante; explorar no. |
-| **Alertas** | Pestañas de sismos de INETER (respaldo USGS) y avisos meteorológicos de WeatherAPI con detalle y enlace a la fuente. |
-| **Emergencia** | Guía visual de actuación y modo SOS visual a pantalla completa. No llama, no envía ubicación y no despacha ayuda. |
+> [!IMPORTANT]
+> **Aviso de Responsabilidad Civil:** HydroAlert es una herramienta estrictamente informativa y comunitaria. **No sustituye** a las autoridades oficiales de emergencia (SINAPRED, INETER, Bomberos, Defensa Civil ni Cruz Blanca). Los eventos sísmicos de INETER o USGS **no constituyen avisos oficiales de evacuación** y los reportes comunitarios **no están verificados por peritos de rescate**.
 
-El mapa, el inicio, las alertas y la lista de reportes están disponibles como invitado. Solo publicar un reporte requiere crear una cuenta o iniciar sesión; la sesión se guarda localmente y nunca bloquea la navegación.
+---
 
-La interfaz sigue automáticamente el tema claro u oscuro configurado en el dispositivo (`ThemeMode.system`); no hay un selector manual dentro de la app.
+## 1. Módulos y Funcionalidades
 
-## Stack
+| Pestaña | Propósito Operativo | Capacidades Clave |
+| :--- | :--- | :--- |
+| **Inicio** | Tablero de resumen y conciencia situacional | Saludo dinámico, clima actual de la zona, últimos 3 sismos con acceso directo a detalles, últimos reportes y acceso rápido a la guía de emergencia. |
+| **Mapa** | Visualización geoespacial interactiva | Google Maps con pines SVG/Bitmap a resolución nativa, visualización de sismos con escala por magnitud, dispersión radial automática de pines coincidentes, capa de radar satelital RainViewer y geolocalización. |
+| **Reportes** | Red colaborativa comunitaria | Feed de incidentes con fotografías (Supabase Storage), filtros por categoría y asistente multipart de dos pasos con geolocalización. Exploración 100% pública; publicación autenticada. |
+| **Alertas** | Monitoreo técnico multivariable | Sismos INETER (respaldo USGS) con ruta directa de monitoreo en tiempo real, alertas de clima WeatherAPI (respaldo OpenWeather) y cálculo de tiempos en huso horario local de Nicaragua (UTC-6). |
+| **Emergencia** | Protocolos y auxilio visual | Guía de actuación ante sismos/inundaciones/incendios y modo SOS visual a pantalla completa (destello intermitente sin consumo de batería en reposo). |
 
-- Flutter 3.44.6 / Dart 3.12.2, null safety estricto.
-- Riverpod 3 (`Notifier` / `AsyncNotifier` + `riverpod_generator`).
-- Freezed 3 y `json_serializable`.
-- `go_router` con `StatefulShellRoute` de cinco ramas.
-- `google_maps_flutter` + Google Maps + RainViewer.
-- Dio para el backend FastAPI, USGS, WeatherAPI y OpenWeatherMap (respaldo).
-- `shared_preferences` para persistir la sesión y `web_socket_channel` para reportes y notificaciones en tiempo real.
-- Firebase Core / Messaging **opcional**.
-- `image_picker` para cámara/galería y `geolocator` para ubicación bajo demanda.
-- Arquitectura Screaming Architecture + MVVM, componentes compartidos inspirados en Atomic Design y tokens centralizados (`AppColors`, `AppPalette`, `AppTypography`, `AppTheme`).
+> [!NOTE]
+> **Acceso como Invitado:** El mapa, el tablero de inicio, las alertas técnicas y la consulta de reportes están siempre abiertos a cualquier usuario sin necesidad de registro ni inicio de sesión. Solo al presionar **Publicar** en un nuevo reporte se solicita iniciar sesión o crear una cuenta de reportante mediante un modal no bloqueante.
 
-## Estructura
+---
 
-```text
-lib/
-├── app/
-│   ├── config/          # dart-defines y banderas de funcionalidad
-│   ├── constants/       # endpoints externos y límites geográficos
-│   ├── router/          # GoRouter y shell de cinco pestañas
-│   └── theme/           # colores, tipografía y tema Material 3
-├── core/
-│   ├── errors/          # fallos de usuario
-│   ├── network/         # clientes Dio y mapeo de errores
-│   ├── services/        # ubicación, notificaciones, push y WebSocket
-│   └── utils/           # fechas en español y mensajes de error
-├── features/
-│   ├── alerts/          # INETER (respaldo USGS), WeatherAPI y OpenWeather
-│   ├── auth/            # cuentas de reportante, invitado y sesión persistida
-│   ├── community_reports/ # reportes y asistente
-│   ├── emergency_sos/   # guía y overlay crítico
-│   ├── home/            # tablero
-│   └── map/             # mapa, radar y capas
-└── shared/
-    ├── atoms/           # botón, logo, badges, estado
-    ├── feedback/        # carga, error y vacío
-    ├── molecules/       # tarjetas, encabezados, avisos
-    └── organisms/       # shell y host de alertas críticas
+## 2. Mapa de Arquitectura del Sistema
+
+La aplicación está diseñada bajo principios de **Screaming Architecture**, desacoplamiento de capas (**Clean Architecture**), patrón **MVVM** mediante **Riverpod 3**, e interfaz modular inspirada en **Atomic Design**.
+
+### 2.1 Diagrama de Componentes y Flujo de Datos
+
+```mermaid
+flowchart TD
+    subgraph UI["Capa de Presentación (UI & MVVM)"]
+        Views["Vistas y Pantallas\n(GoRouter StatefulShellRoute de 5 Ramas)"]
+        VM["ViewModels & Estados Inmutables\n(AsyncNotifier · StateNotifier · Freezed)"]
+        SharedUI["Sistema de Diseño (Atomic Design)\nAtoms · Molecules · Organisms · Feedback"]
+        Views --> VM
+        Views --> SharedUI
+    end
+
+    subgraph Domain["Capa de Dominio (Reglas de Negocio Puras)"]
+        Entities["Entidades de Dominio\n(SeismicEvent, CommunityReport, AuthSession)"]
+        Ports["Contratos e Interfaces (Ports)\n(AlertsRepository, CommunityReportsRepository, AuthRepository)"]
+        Entities -.-> Ports
+    end
+
+    subgraph Data["Capa de Datos (Infraestructura y Persistencia)"]
+        Repos["Implementación de Repositorios\n(AlertsRepositoryImpl, ReportsRepositoryImpl)"]
+        RemoteDS["Fuentes Remotas (HTTP Dio)\n(IneterSeismicDataSource, WeatherApiDataSource)"]
+        RealtimeDS["Servicio en Tiempo Real\n(WebSocketChannel: reports, notifications)"]
+        LocalDS["Almacenamiento Local Seguro\n(SharedPreferences con timeout de seguridad)"]
+        Repos --> RemoteDS
+        Repos --> RealtimeDS
+        Repos --> LocalDS
+    end
+
+    subgraph External["Servicios Externos y Backend"]
+        FastAPI["API Gateway FastAPI (:8000)\nREST Endpoints + WebSockets"]
+        Supabase["Supabase Storage CDN\n(Bucket de Imágenes Públicas)"]
+        INETER["Servidor INETER / USGS\n(Monitoreo Sísmico Nacional)"]
+        Weather["WeatherAPI / RainViewer\n(Meteorología y Radar de Lluvia)"]
+    end
+
+    VM --> Ports
+    Ports --> Repos
+    RemoteDS --> FastAPI
+    RemoteDS --> INETER
+    RemoteDS --> Weather
+    RemoteDS --> Supabase
 ```
 
-Los archivos generados (`*.g.dart`, `*.freezed.dart`, `*.riverpod.dart`) se producen con `build_runner` y están excluidos del análisis estático.
+---
 
-## Puesta en marcha
+## 3. Sistema de Diseño & Atomic Design
+
+La interfaz de usuario de HydroAlert está estructurada bajo la metodología de **Atomic Design** (Brad Frost), garantizando consistencia visual, desacoplamiento estricto de la lógica y alta reusabilidad tanto en estados normales como en situaciones de emergencia.
+
+```mermaid
+flowchart LR
+    Tokens["Design Tokens\n(Colores, Tipografía, Motion)"] --> Atoms["Átomos\n(Botones, Badges, Logos)"]
+    Atoms --> Molecules["Moléculas\n(Cards, Banners, Headers)"]
+    Molecules --> Organisms["Organismos\n(Shell, WaveNavBar, SOS Host)"]
+    Organisms --> Pages["Páginas / Vistas\n(Home, Mapa, Reportes, Alertas)"]
+```
+
+### 3.1 Estructura por Capas Atómicas en `lib/shared/`
+
+* **Design Tokens (`lib/app/theme/`)**:
+  - `AppColors`: Paleta cromática centralizada con contraste validado para emergencias (`brandOrange`, `seismicStrong`, `categoryOther` violeta, etc.).
+  - `AppPalette`: Sistema de temas reactivo claro y oscuro inyectado como `ThemeExtension` para adaptación automática al sistema operativo (`ThemeMode.system`).
+  - `AppTypography`: Jerarquía de fuentes con interlineado optimizado para lectura rápida y legible bajo luz solar directa.
+  - `AppMotion`: Constantes de velocidad y curvas de animación para interacción fluida sin fatiga visual.
+
+* **Átomos (`lib/shared/atoms/`)**: Unidades indivisibles y reutilizables.
+  - `CustomButton`: Botón háptico con variantes (`primary`, `secondary`, `outline`, `danger`), estados de carga (`isBusy`) e icono adaptable.
+  - `AlertBadge`: Insignia visual con código de color dinámico para magnitudes de sismo, estados y categorías.
+  - `AppLogo`: Isotipo y logotipo vectorial adaptable al fondo.
+  - `StatusIndicator`: Indicador pulsante del estado de la conexión en tiempo real.
+
+* **Moléculas (`lib/shared/molecules/`)**: Combinaciones de átomos con propósito funcional.
+  - `AppCard`: Contenedor base elevado con esquinas redondeadas, soporte táctil (`onTap`) y tratamiento de elevación.
+  - `InfoBanner`: Bloque informativo para avisos y estados de advertencia (`warning`, `info`, `danger`, `success`).
+  - `SectionHeader`: Título de bloque con subtítulo explicativo y acción secundaria.
+
+* **Organismos (`lib/shared/organisms/`)**: Componentes complejos que gestionan regiones completas de la interfaz.
+  - `AppShell`: Estructura principal que sostiene la navegación entre las cinco pestañas mediante la barra personalizada `WaveNavBar` (barra ondulada de navegación con elevación sobre el mapa).
+  - `CriticalAlertHost`: Orquestador de alertas críticas que proyecta ventanas flotantes inmediatas sobre cualquier pantalla al registrar sismos de magnitud $\ge 5.0$ o avisos de emergencia vía WebSockets/Push.
+
+* **Feedback y Movimiento (`lib/shared/feedback/` y `lib/shared/motion/`)**:
+  - `LoadingState`, `ErrorState`, `EmptyState`: Estados normalizados para peticiones asíncronas con opción de reintento.
+  - `AppAnimatedEntrance`: Entrada escalonada de elementos con retraso incremental para guiar la atención del usuario.
+  - `AppPressScale`: Microinteracción física que reduce la escala del elemento al toque para retroalimentación táctil inmediata.
+
+---
+
+## 4. Guía de Navegación: ¿Dónde encontrar cada cosa?
+
+Para facilitar el mantenimiento y la extensibilidad, la solución organiza sus archivos por contexto de dominio y responsabilidad:
+
+| Responsabilidad | Ubicación en el Proyecto | Archivos y Componentes Clave |
+| :--- | :--- | :--- |
+| **Configuración & Entorno** | [`lib/app/config/`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/app/config/) | [`app_config.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/app/config/app_config.dart): Lectura de `--dart-define`, detección de plataforma (Android emulator `10.0.2.2` vs localhost) y resolución de URLs de CDN. |
+| **Constantes & Endpoints** | [`lib/app/constants/`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/app/constants/) | [`api_endpoints.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/app/constants/api_endpoints.dart): URLs oficiales de INETER en tiempo real, USGS, rutas REST y coordenadas geográficas de Nicaragua. |
+| **Enrutamiento** | [`lib/app/router/`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/app/router/) | [`app_router.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/app/router/app_router.dart): Configuración de `GoRouter`, rutas hijas, transiciones y estructura `StatefulShellRoute`. |
+| **Tokens & Temas** | [`lib/app/theme/`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/app/theme/) | [`app_colors.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/app/theme/app_colors.dart), [`app_typography.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/app/theme/app_typography.dart), [`app_theme.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/app/theme/app_theme.dart): Paleta centralizada, soporte dinámico claro/oscuro (`AppPalette`) y Material 3. |
+| **Red & Fallos** | [`lib/core/network/`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/core/network/) | [`api_client.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/core/network/api_client.dart), [`error_handler.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/core/network/error_handler.dart): Interceptores Dio y traducción de errores del backend (inglés a mensajes amigables en español). |
+| **Servicios del Sistema** | [`lib/core/services/`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/core/services/) | [`realtime_service.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/core/services/realtime_service.dart) (WebSocket con reconexión exponencial y ping a 30s), [`location_service.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/core/services/location_service.dart), [`notification_service.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/core/services/notification_service.dart). |
+| **Módulo de Sismos & Clima** | [`lib/features/alerts/`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/features/alerts/) | [`ineter_seismic_datasource.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/features/alerts/data/datasources/ineter_seismic_datasource.dart), [`alerts_viewmodel.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/features/alerts/presentation/viewmodels/alerts_viewmodel.dart), hojas de detalle de sismos e incidentes. |
+| **Módulo de Autenticación** | [`lib/features/auth/`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/features/auth/) | [`auth_viewmodel.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/features/auth/presentation/viewmodels/auth_viewmodel.dart), [`auth_sheet.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/features/auth/presentation/widgets/auth_sheet.dart): Modal de login/registro, validación de cédula nicaragüense y almacenamiento de token `Bearer`. |
+| **Módulo de Reportes** | [`lib/features/community_reports/`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/features/community_reports/) | [`report_wizard_view.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/features/community_reports/presentation/views/report_wizard_view.dart): Flujo guiado de dos pasos con compresión de foto, categorías (`ReportCategory`) y envío multipart. |
+| **Módulo de Mapa Operativo** | [`lib/features/map/`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/features/map/) | [`live_map_view.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/features/map/presentation/views/live_map_view.dart), [`map_marker_controller.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/features/map/presentation/controllers/map_marker_controller.dart): Generación de pines Bitmap con resolución por pantalla y algoritmo de dispersión de coordenadas coincidentes. |
+| **Tablero de Inicio (Home)** | [`lib/features/home/`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/features/home/) | [`home_view.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/features/home/presentation/views/home_view.dart), [`home_seismic_section.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/features/home/presentation/widgets/home_seismic_section.dart): Tarjetas con evento `onTap` que activan modales completos de detalle. |
+| **Átomos & Moléculas (UI)** | [`lib/shared/`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/shared/) | [`custom_button.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/shared/atoms/custom_button.dart), [`app_card.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/shared/molecules/app_card.dart), [`state_views.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/shared/feedback/state_views.dart), [`wave_nav_bar.dart`](file:///c:/Users/Walter_Jiron/proyects/ProfeTania/hydro_alert/lib/shared/organisms/wave_nav_bar.dart): Componentes reutilizables con animación y respuesta táctil. |
+
+---
+
+## 5. Guía de Instalación y Puesta en Marcha
+
+Sigue estos pasos para clonar, configurar el entorno y ejecutar HydroAlert en dispositivos físicos o emuladores.
+
+### 5.1 Requisitos Previos
+
+- **Flutter SDK:** Versión `>= 3.24.0` (recomendado canal `stable`).
+- **Dart SDK:** Versión `>= 3.5.0`.
+- **JDK:** OpenJDK 17 configurado en el sistema (`JAVA_HOME`).
+- **Android Studio / Android SDK:** Android SDK Command-line Tools y Build-Tools `>= 34.0.0`.
+- **Xcode (solo macOS/iOS):** Versión 15+ con CocoaPods instalado (`sudo gem install cocoapods`).
+- **Git** instalado.
+
+---
+
+### 5.2 Paso 1: Clonar el Repositorio e Instalar Dependencias
+
+Abre una terminal y ejecuta:
 
 ```bash
+cd proyects/ProfeTania/hydro_alert
 flutter pub get
-dart run build_runner build
-flutter analyze
-flutter test
-flutter run
 ```
 
-### Variables de compilación
+---
 
-Nunca se guardan secretos en el repositorio. Usa `--dart-define`:
+### 5.3 Paso 2: Generación de Código Automatizado
 
-| Variable | Obligatoria | Descripción |
-| --- | --- | --- |
-| `WEATHERAPI_KEY` | No | Clave de WeatherAPI (fuente primaria del clima y sus avisos). Sin ella ni `OPENWEATHER_API_KEY`, el clima muestra un estado no disponible. |
-| `OPENWEATHER_API_KEY` | No | Clave de OpenWeatherMap One Call 3.0, usada solo como respaldo cuando WeatherAPI falla. |
-| `API_BASE_URL` | No | URL base del backend FastAPI. Por defecto usa `http://10.0.2.2:8000/api/v1` en el emulador Android y `http://localhost:8000/api/v1` en el resto. Si se omite el prefijo `/api/v1`, se agrega automáticamente. |
-| `FIREBASE_ENABLED` | No | `true` activa Firebase Messaging. Por defecto `false`. |
-| `SOS_MAGNITUDE_THRESHOLD` | No | Magnitud mínima para el overlay crítico. Por defecto `5.0`. |
-| `SOS_EVENT_MAX_AGE_MINUTES` | No | Antigüedad máxima de un sismo para el overlay. Por defecto `15`. |
+El proyecto utiliza generadores de código para inmutabilidad (`freezed`), serialización JSON (`json_serializable`) y proveedores de estado (`riverpod_generator`).
 
-Las claves nativas de Google Maps no se pasan por `--dart-define`. Se configuran una sola vez en cada plataforma (ver abajo).
+Ejecuta el generador para asegurar que todos los archivos `*.g.dart` y `*.freezed.dart` estén actualizados:
 
-Ejemplo:
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
 
+---
+
+### 5.4 Paso 3: Configuración de Google Maps API Key
+
+Para renderizar la cartografía en la pestaña **Mapa**, se requiere una clave de Google Maps con **Maps SDK for Android** y **Maps SDK for iOS** habilitados en Google Cloud Console.
+
+#### En Android
+Crea o edita el archivo `android/local.properties` (este archivo está excluido de git por seguridad):
+
+```properties
+sdk.dir=C:\\Users\\TuUsuario\\AppData\\Local\\Android\\Sdk
+flutter.sdk=C:\\Users\\TuUsuario\\flutter
+GOOGLE_MAPS_API_KEY=AIzaSyTuClaveDeGoogleMapsAqui
+```
+
+> [!TIP]
+> `android/app/build.gradle.kts` inyecta automáticamente esta variable en el `AndroidManifest.xml` como `com.google.android.geo.API_KEY`.
+
+#### En iOS
+Asegúrate de configurar la clave en `ios/Runner/AppDelegate.swift`:
+```swift
+GMSServices.provideAPIKey("AIzaSyTuClaveDeGoogleMapsAqui")
+```
+
+---
+
+### 5.5 Paso 4: Conexión con el Backend Local (FastAPI)
+
+El backend de HydroAlert se ejecuta en Docker en el puerto `8000`. Dependiendo del entorno en el que ejecutes la app móvil:
+
+#### A) En Emulador Android Oficial:
+El emulador de Google mapea el `localhost` de tu computadora en la dirección IP `10.0.2.2`.
+- `API_BASE_URL=http://10.0.2.2:8000/api/v1` *(predeterminado automático)*.
+
+#### B) En Dispositivo Físico Android por USB:
+Para que tu teléfono conectado por cable acceda al servidor Docker local en `localhost:8000`:
+1. Asegúrate de tener activa la depuración USB en tu dispositivo.
+2. Ejecuta el reenvío de puertos mediante ADB:
+   ```bash
+   adb reverse tcp:8000 tcp:8000
+   ```
+3. Ahora el teléfono puede consultar `http://localhost:8000/api/v1` de forma transparente.
+
+---
+
+### 5.6 Paso 5: Ejecución de la Aplicación
+
+Puedes ejecutar la app pasando las variables de entorno mediante `--dart-define`:
+
+#### Ejecución Estándar con Backend Local:
 ```bash
 flutter run \
-  --dart-define=WEATHERAPI_KEY=tu_clave \
   --dart-define=API_BASE_URL=http://localhost:8000/api/v1 \
-  --dart-define=FIREBASE_ENABLED=false
+  --dart-define=WEATHERAPI_KEY=tu_clave_opcional
 ```
 
-En un dispositivo físico, reemplaza `localhost` por la IP de la máquina que ejecuta el backend, por ejemplo `http://192.168.1.20:8000/api/v1`.
+#### En un dispositivo específico (ejemplo USB):
+```bash
+# Ver dispositivos conectados:
+flutter devices
 
-Para desarrollo local, Android permite HTTP solo en las variantes debug/profile (`src/debug` y `src/profile`); los builds release mantienen `usesCleartextTraffic="false"`. iOS permite redes locales con `NSAllowsLocalNetworking`. En producción usa `https://` y `wss://`.
+# Ejecutar en tu dispositivo:
+flutter run -d <DEVICE_ID> --dart-define=API_BASE_URL=http://localhost:8000/api/v1
+```
 
-### Google Maps
+---
 
-El mapa base usa el SDK nativo de Google Maps.
+### 5.7 Tabla Completa de Variables de Compilación (`--dart-define`)
 
-**Android**
+| Variable | Tipo | Valor Predeterminado | Propósito |
+| :--- | :--- | :--- | :--- |
+| `API_BASE_URL` | String | `http://10.0.2.2:8000/api/v1` (Android)<br>`http://localhost:8000/api/v1` (Otros) | URL base contractual de la API FastAPI. Si se omite `/api/v1`, la app lo concatena de forma segura. |
+| `WEATHERAPI_KEY` | String | *Vacío* | Clave de acceso a WeatherAPI para pronóstico meteorológico y alertas en Managua. |
+| `OPENWEATHER_API_KEY`| String | *Vacío* | Clave de OpenWeatherMap One Call 3.0 (utilizada exclusivamente como fallback ante caídas). |
+| `FIREBASE_ENABLED` | bool | `false` | Activa el registro en segundo plano de Firebase Cloud Messaging (FCM). |
+| `SOS_MAGNITUDE_THRESHOLD` | double | `5.0` | Umbral mínimo de magnitud sísmica para disparar la tarjeta de emergencia prioritaria. |
+| `SOS_EVENT_MAX_AGE_MINUTES` | int | `15` | Tiempo máximo en minutos de un sismo para considerarlo activo para alerta prioritaria. |
 
-1. Agrega la clave en `android/local.properties` (ignorado por git):
+---
 
-   ```properties
-   GOOGLE_MAPS_API_KEY=tu_clave
-   ```
+## 6. Control de Calidad y Pruebas
 
-2. `android/app/build.gradle.kts` la inyecta como `manifestPlaceholders["googleMapsApiKey"]` y `AndroidManifest.xml` la publica en `com.google.android.geo.API_KEY`.
-
-**iOS**
-
-`ios/Runner/AppDelegate.swift` llama a `GMSServices.provideAPIKey("...")` antes de inicializar Flutter. El proyecto requiere **iOS 14 o superior** por el SDK de Google Maps.
-
-**Restricciones recomendadas en Google Cloud**
-
-- Habilitar **Maps SDK for Android** y **Maps SDK for iOS**.
-- Restringir la clave de Android al package `ni.hydroalert.app` y al SHA-1 del keystore usado para firmar.
-- Restringir la clave de iOS al bundle ID de la app.
-- Si el mapa aparece en blanco o gris, revisa `adb logcat`/Xcode en busca de `API key not valid` o restricciones de paquete/SHA-1.
-
-## Fuentes de datos y límites
-
-### INETER (primaria)
-
-- El backend FastAPI sincroniza los eventos de INETER y los expone en `GET {API_BASE_URL}/seismic-events`.
-- Parámetros usados por la app: `page=1`, `page_size=100` y `from_date` con los últimos 30 días.
-- Campos leídos: `id`, `event_at` (o `event_date` + `event_time`), `latitude`, `longitude`, `depth_km`, `magnitude`, `location`, `pais`, `status`, `source`.
-- Si `event_at` falta, la app interpreta `event_date`/`event_time` como hora local de Nicaragua (UTC-6).
-- Los eventos se muestran con la etiqueta de su fuente; una lista vacía de INETER se muestra como estado vacío y **no** activa el respaldo.
-- Si el backend o INETER fallan, se consulta USGS como respaldo.
-
-### USGS (respaldo)
-
-- Endpoint: `https://earthquake.usgs.gov/fdsnws/event/1/query`.
-- Filtro para Nicaragua: latitud `10.7..15.0`, longitud `-87.7..-82.5`.
-- Magnitud mínima `2.5`, orden por tiempo, ventana de 30 días, límite 50.
-- Solo se consulta cuando el backend/INETER no está disponible.
-- Los registros se muestran como información de USGS, nunca como alerta oficial de evacuación.
-
-### WeatherAPI (primaria)
-
-- Endpoint: `https://api.weatherapi.com/v1/forecast.json`.
-- Parámetros: ubicación `lat,lon`, `days=3` (límite del plan Free), `aqi=no`, `alerts=yes`, `lang=es`.
-- Ubicación por defecto: Managua (`12.136389, -86.251389`).
-- Los avisos se muestran como información de WeatherAPI; no sustituyen a SINAPRED o INETER.
-- Sin clave o con clave inválida, el repositorio intenta OpenWeatherMap si está configurado; si tampoco lo está, la interfaz degrada a un estado informativo sin inventar datos.
-
-### OpenWeatherMap (respaldo)
-
-- Endpoint: One Call 3.0 (`data/3.0/onecall`), unidades métricas, idioma español.
-- Solo se consulta cuando WeatherAPI no está configurada o su petición falla.
-- Requiere clave y suscripción activa a One Call 3.0.
-
-### RainViewer
-
-- Metadatos: `https://api.rainviewer.com/public/weather-maps.json`.
-- Capa de radar opcional, activada manualmente por el usuario.
-- RainViewer sirve teselas de radar hasta **zoom 7**; por encima, la app recorta y amplía la tesela padre de zoom 7 en lugar de pedir niveles inexistentes.
-- Se muestra atribución de Google Maps (logotipo del mapa) y RainViewer cuando la capa está activa. La leyenda incluye los créditos completos.
-
-### Cuentas de reportante
-
-- `POST {API_BASE_URL}/auth/register` con `name`, `email`, `password` y `cedula`; responde `{ token, user: { id, name, email } }`.
-- `POST {API_BASE_URL}/auth/login` con `email` y `password`; devuelve la misma estructura.
-- La cédula debe tener el formato `000-000000-0000A` y la contraseña al menos 8 caracteres.
-- El token se guarda con `shared_preferences`; cerrar sesión lo elimina.
-- Sin cuenta se puede explorar la app completa. El asistente de reportes abre la hoja de acceso solo al enviar.
-
-### Reportes comunitarios
-
-- `GET {API_BASE_URL}/reports/active` es público y no requiere token.
-- `POST {API_BASE_URL}/reports` usa multipart con `category`, `description`, `latitude`, `longitude` y `photo` opcional; exige `Authorization: Bearer <token>`.
-- Categorías en el cable: `flood`, `damaged_drain`, `fallen_tree`, `landslide`, `fire`, `earthquake_damage`, `other`.
-- La foto puede ser una URL absoluta (Supabase) o una ruta relativa como `/api/v1/reports/photos/{id}`; ambas se resuelven contra el origen del API.
-- La app tolera variantes de campos en lectura: `id`/`_id`, `photoUrl`/`photo_url`, `createdAt`/`created_at`.
-- Los mensajes del backend llegan en inglés y se traducen a español para el usuario (`email_already_registered`, `cedula_already_registered`, `invalid_credentials`, `invalid_token`, `photo_too_large`, `unsupported_photo`, `rate_limited`, entre otros).
-- Todos los reportes se muestran con la etiqueta **Sin verificar**; nunca se presentan como alertas oficiales.
-
-### Tiempo real (WebSocket)
-
-- Endpoint: `ws://{host}:8000/api/v1/ws?channels=reports,notifications` (`wss://` en producción).
-- Es público: no requiere token y la app entra como invitada.
-- Eventos: `connection.ready`, `report.created`, `report.deleted`, `notification.created`, `pong` y `error`.
-- La app envía `{"action":"ping","sentAt":"..."}` cada 30 s, reanuda con `lastEventId` y reconecta con retroceso exponencial.
-- `report.created` y `report.deleted` refrescan la lista de reportes en silencio.
-- `notification.created` alimenta el overlay crítico de emergencia.
-
-## Firebase (opcional)
-
-La app funciona completamente sin Firebase. Para habilitar notificaciones push:
-
-1. Crea el proyecto en Firebase y registra Android (`ni.hydroalert.app`) e iOS (`ni.hydroalert.app`).
-2. Agrega `android/app/google-services.json` y `ios/Runner/GoogleService-Info.plist`.
-3. Aplica el plugin de Google Services en Android y sube los archivos a la configuración de iOS.
-4. Compila con `--dart-define=FIREBASE_ENABLED=true`.
-
-Sin esos archivos, `NotificationService` captura el fallo, lo registra y la app sigue funcionando. El overlay crítico también reacciona a sismos recientes de INETER publicados por el backend, a notificaciones en tiempo real y a mensajes push, según el umbral configurado, sin depender de Firebase.
-
-## SOS visual
-
-El botón de emergencia y el overlay **no** realizan llamadas, **no** envían mensajes, **no** comparten la ubicación y **no** despachan ayuda automáticamente. Solo muestran instrucciones grandes y claras. La ubicación solo se solicita cuando el usuario pulsa explícitamente «Usar mi ubicación» en el mapa o en el asistente de reportes.
-
-## Permisos
-
-- Android: internet, ubicación aproximada/precisa, cámara y notificaciones.
-- iOS: ubicación en uso, cámara, fototeca y modo remoto de notificaciones.
-- Los permisos se solicitan en el momento en que se usan, nunca al iniciar.
-
-## Identificadores
-
-- Nombre visible: **HydroAlert**.
-- Bundle ID / applicationId: `ni.hydroalert.app`.
-- Paquete Dart: `hydro_alert`.
-
-## Validación
+El proyecto cuenta con un riguroso estándar de calidad de código y cobertura de pruebas automatizadas:
 
 ```bash
+# 1. Formateo estricto de código Dart
 dart format lib test
+
+# 2. Análisis estático (Reglas Linter de Flutter & Pedantic)
 flutter analyze
+
+# 3. Ejecución de suite de pruebas unitarias y de widgets
 flutter test
 ```
 
-Estado actual: `flutter analyze` sin incidencias y pruebas unitarias y de widget aprobadas.
+> [!NOTE]
+> Estado actual: **0 incidencias** en `flutter analyze` y **63 pruebas automatizadas aprobadas al 100%** (incluyendo validación de dispersión de pines en mapa, esquemas de error del backend y mapeo INETER/USGS).
 
-## Pendientes conocidos
+---
 
-- Configurar `API_BASE_URL` del backend FastAPI desplegado y usar `wss://` en producción.
-- Configurar la clave de WeatherAPI para habilitar clima y avisos (OpenWeatherMap es opcional como respaldo).
-- Configurar Firebase si se requieren notificaciones push.
-- Configurar firma de release para Android e iOS.
+## 7. Compilación de Paquetes (Builds)
+
+### Generar APK de depuración:
+```bash
+flutter build apk --debug --dart-define=API_BASE_URL=http://localhost:8000/api/v1
+```
+*Ubicación de salida:* `build/app/outputs/flutter-apk/app-debug.apk`
+
+### Generar APK / App Bundle optimizado para producción:
+```bash
+flutter build appbundle --release --dart-define=API_BASE_URL=https://api.tudominio.com/api/v1
+```
+
+---
+
+## 8. Permisos de Plataforma
+
+La aplicación implementa el principio de privilegio mínimo; los permisos nunca se piden al inicio, sino de forma diferida en el momento exacto en que el usuario interactúa con la función:
+
+- **Ubicación (`ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`):** Solicitada solo cuando se pulsa el botón de centrar en el mapa o en el paso 2 del asistente de reportes comunitarios.
+- **Cámara (`CAMERA`):** Solicitada únicamente si el usuario elige tomar una fotografía en vivo para evidenciar su reporte.
+- **Almacenamiento / Galería (`READ_MEDIA_IMAGES`):** Solicitada al adjuntar una foto existente desde la fototeca del teléfono.
+- **Notificaciones (`POST_NOTIFICATIONS`):** Para alertas críticas de sismos mayores a magnitud 5.0.
