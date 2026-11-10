@@ -239,15 +239,6 @@ flutter run \
   --dart-define=WEATHERAPI_KEY=tu_clave_opcional
 ```
 
-#### En un dispositivo específico (ejemplo USB):
-```bash
-# Ver dispositivos conectados:
-flutter devices
-
-# Ejecutar en tu dispositivo:
-flutter run -d <DEVICE_ID> --dart-define=API_BASE_URL=http://localhost:8000/api/v1
-```
-
 ---
 
 ### 5.7 Tabla Completa de Variables de Compilación (`--dart-define`)
@@ -280,21 +271,6 @@ flutter test
 
 > [!NOTE]
 > Estado actual: **0 incidencias** en `flutter analyze` y **63 pruebas automatizadas aprobadas al 100%** (incluyendo validación de dispersión de pines en mapa, esquemas de error del backend, mapeo INETER/USGS y notificaciones sísmicas locales).
-
----
-
-## 7. Compilación de Paquetes (Builds)
-
-### Generar APK de depuración:
-```bash
-flutter build apk --debug --dart-define=API_BASE_URL=http://localhost:8000/api/v1
-```
-*Ubicación de salida:* `build/app/outputs/flutter-apk/app-debug.apk`
-
-### Generar APK / App Bundle optimizado para producción:
-```bash
-flutter build appbundle --release --dart-define=API_BASE_URL=https://api.tudominio.com/api/v1
-```
 
 ---
 
