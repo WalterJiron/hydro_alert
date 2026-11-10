@@ -1,7 +1,7 @@
 # HydroAlert · App Móvil
 
 <p align="center">
-  <img src="assets/images/app_logo.png" alt="HydroAlert Logo" width="110" height="110" />
+  <img src="assets/images/logo.png" alt="HydroAlert Logo" width="300" height="300" />
 </p>
 
 <p align="center">
@@ -17,9 +17,6 @@
   <img src="https://img.shields.io/badge/Backend-FastAPI%20%2B%20PostgreSQL-009688?logo=fastapi&logoColor=white" alt="Backend" />
   <img src="https://img.shields.io/badge/License-Proprietary-red" alt="License" />
 </p>
-
-> [!IMPORTANT]
-> **Aviso de Responsabilidad Civil:** HydroAlert es una herramienta estrictamente informativa y comunitaria. **No sustituye** a las autoridades oficiales de emergencia (SINAPRED, INETER, Bomberos, Defensa Civil ni Cruz Blanca). Los eventos sísmicos de INETER o USGS **no constituyen avisos oficiales de evacuación** y los reportes comunitarios **no están verificados por peritos de rescate**.
 
 ---
 
