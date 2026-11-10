@@ -317,30 +317,68 @@ HydroAlert emite una **notificación del sistema** (canal `hydroalert_seismic`, 
 
 | Aspecto | Detalle |
 | :--- | :--- |
-| **Motor** | `flutter_local_notifications` v23 — sin dependencia de Firebase |
-| **Canal Android** | `hydroalert_seismic` · Importancia **Alta** · Vibración + sonido |
-| **Umbral** | Configurable via `--dart-define=SOS_MAGNITUDE_THRESHOLD=5.0` |
-| **Deduplicación** | ID estable derivado del hash del evento; no se apilan duplicados |
-| **Históricos** | Los eventos presentes al abrir la app no generan notificación |
-| **Permiso** | Solicitado en la primera sesión con sismo fuerte (Android 13+) |
+| **Motor** | `flutter_local_notifications` (con Java core desugaring) — 100% independiente de Firebase |
+| **Canal Android** | `hydroalert_seismic` · Importancia **Alta** (Heads-up) · Vibración + Sonido |
+| **Umbral Sísmico** | Parametrizable via `--dart-define=SOS_MAGNITUDE_THRESHOLD=5.0` (por defecto M5.0) |
+| **Deduplicación** | Hash determinista por `event.id`; actualiza el banner sin generar spam |
+| **Protección Inicial**| Sismos históricos al abrir la app se memorizan sin disparar falsas alarmas |
+| **Gestión de Permisos**| Solicitud diferida e incremental (Android 13+ / iOS) ante el primer evento real |
 
-### Flujo de Notificación
+### 9.1 Flujo Operativo del Pipeline de Alertas
 
+```mermaid
+flowchart TD
+    subgraph INGESTION["1. Ingesta de Eventos Sísmicos"]
+        Timer["Timer Periódico\n(Cada 5 minutos)"]
+        Refresh["Pull-to-Refresh\n(Acción del usuario)"]
+        Repo["AlertsRepositoryImpl\n(INETER Primario / Fallback USGS)"]
+        Timer --> Repo
+        Refresh --> Repo
+    end
+
+    subgraph ENGINE["2. Motor de Filtrado y Deduplicación (AlertsViewModel)"]
+        Events["Lista de Eventos Recientes\n(List&lt;SeismicEvent&gt;)"]
+        ThresholdCheck{"¿Magnitud >= 5.0?\n(AppConfig.sosMagnitudeThreshold)"}
+        DuplicationCheck{"¿ID registrado previamente?\nevent.id in _notifiedIds"}
+        Register["Registrar ID en Memoria\n_notifiedIds.add(event.id)"]
+        Ignore["Descartar Silenciosamente\n(Sin alerta redundante)"]
+
+        Repo --> Events
+        Events --> ThresholdCheck
+        ThresholdCheck -- "No (&lt; 5.0)" --> Ignore
+        ThresholdCheck -- "Sí (&gt;= 5.0)" --> DuplicationCheck
+        DuplicationCheck -- "Ya notificado" --> Ignore
+        DuplicationCheck -- "Evento nuevo" --> Register
+    end
+
+    subgraph NOTIFICATION["3. Despacho Nativo (SeismicNotificationService)"]
+        Service["SeismicNotificationService\nshowSeismicAlert(event)"]
+        Payload["Construcción de Metadatos\n• Título: Sismo M5.3 — Ubicación\n• Cuerpo: Magnitud, Profundidad y Fuente"]
+        Channel["Canal de Alta Prioridad\nCanal: hydroalert_seismic\n(Importance.high · Vibrate · Sound)"]
+
+        Register --> Service
+        Service --> Payload
+        Payload --> Channel
+    end
+
+    subgraph OS_SURFACE["4. Experiencia de Usuario en el Dispositivo"]
+        HeadsUp["Alerta del Sistema Operativo\n(Notificación flotante en barra de estado)"]
+        Badge["Insignia Visual en AppBar\n(Badge '1 fuerte' en vista de Alertas)"]
+        AppOpen["Tap en Notificación\n(Apertura directa de HydroAlert)"]
+
+        Channel --> HeadsUp
+        HeadsUp --> AppOpen
+        Register -.-> Badge
+    end
 ```
-AlertsViewModel._refreshSilently()   ← cada 5 min (Timer)
-        │
-        ▼
-  evento nuevo AND magnitud ≥ 5.0 AND id ∉ _notifiedIds
-        │
-        ▼
-SeismicNotificationService.showSeismicAlert()
-        │
-        ▼
-  FlutterLocalNotificationsPlugin.show()   →  Canal hydroalert_seismic
-        │
-        ▼
-  Notificación sistema  🌍 Sismo M5.3 — Managua, Nicaragua
-```
+
+### 9.2 Fases del Ciclo de Notificación
+
+1. **Ingesta Multi-Fuente:** `AlertsViewModel` consulta el feed de eventos sísmicos cada 5 minutos de forma silenciosa en segundo plano (y ante cada gesto de actualización manual), priorizando el catálogo oficial de INETER con conmutación por error a USGS ante fallas de red.
+2. **Evaluación de Severidad:** Se filtran exclusivamente los sismos cuya magnitud supere o iguale el umbral crítico configurado (`SOS_MAGNITUDE_THRESHOLD`, 5.0 por defecto).
+3. **Control de Idempotencia y Deduplicación:** Se mantiene un registro en memoria (`_notifiedIds`) de los sismos ya advertidos en la sesión. Durante el arranque inicial de la aplicación, el catálogo histórico se indexa de inmediato para evitar notificaciones retroactivas indeseadas.
+4. **Despacho al Canal de Alta Prioridad:** Los sismos que superan el filtrado se envían a `SeismicNotificationService.showSeismicAlert()`, utilizando el canal Android `hydroalert_seismic` con vibración háptica y sonido para garantizar que la alerta sea percibida incluso con la app cerrada o en segundo plano.
+5. **Sincronización con la UI:** Simultáneamente, el encabezado de la pestaña **Alertas** activa una insignia de advertencia (`_StrongEventsBadge`) indicando la cantidad de sismos de alta intensidad detectados en el ciclo actual.
 
 ### Integración con la Alerta Crítica (In-App)
 
