@@ -25,11 +25,14 @@ class WelcomeView extends ConsumerWidget {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
+            final minHeight = constraints.hasBoundedHeight
+                ? (constraints.maxHeight - 60).clamp(0.0, double.infinity)
+                : 0.0;
             return SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight - 60,
+                  minHeight: minHeight,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
