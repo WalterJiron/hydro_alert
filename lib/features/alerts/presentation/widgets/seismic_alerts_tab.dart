@@ -12,13 +12,16 @@ import '../viewmodels/alerts_viewmodel.dart';
 import '../widgets/seismic_event_card.dart';
 import '../widgets/seismic_event_sheet.dart';
 
-/// USGS earthquakes tab of the alerts screen.
+/// Seismic events tab of the alerts screen (INETER with USGS fallback).
 class SeismicAlertsTab extends ConsumerWidget {
   const SeismicAlertsTab({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final alerts = ref.watch(alertsViewModelProvider);
+    final sourceLabel = alerts.value?.isNotEmpty == true
+        ? alerts.value!.first.source
+        : 'INETER';
 
     return RefreshIndicator(
       onRefresh: () => ref.read(alertsViewModelProvider.notifier).refresh(),
@@ -31,9 +34,10 @@ class SeismicAlertsTab extends ConsumerWidget {
             child: InfoBanner(
               icon: LucideIcons.shieldAlert,
               tone: InfoBannerTone.warning,
-              title: 'Eventos de USGS',
+              title: 'Eventos sísmicos',
               message:
-                  'Son registros sísmicos públicos, no alertas oficiales de evacuación. '
+                  'Provienen de INETER (con respaldo de USGS si el servicio no '
+                  'está disponible). No son alertas oficiales de evacuación. '
                   'Sigue las indicaciones de SINAPRED y las autoridades locales.',
             ),
           ),
@@ -64,7 +68,7 @@ class SeismicAlertsTab extends ConsumerWidget {
                       icon: LucideIcons.activity,
                       title: 'Sin sismos recientes',
                       message:
-                          'USGS no reporta eventos de magnitud 2.5 o superior en el área de Nicaragua durante los últimos 30 días.',
+                          'No hay eventos sísmicos reportados en el área de Nicaragua durante los últimos 30 días.',
                     ),
                   ),
                 ];
@@ -80,8 +84,8 @@ class SeismicAlertsTab extends ConsumerWidget {
                         style: AppTypography.titleSmall,
                       ),
                       const SizedBox(width: 8),
-                      const AlertBadge(
-                        label: 'USGS',
+                      AlertBadge(
+                        label: sourceLabel,
                         tone: AppBadgeTone.info,
                         icon: LucideIcons.activity,
                       ),

@@ -19,13 +19,14 @@ class AlertBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final (background, foreground) = switch (tone) {
-      AppBadgeTone.neutral => (AppColors.surfaceMuted, AppColors.textSecondary),
-      AppBadgeTone.info => (AppColors.infoSoft, AppColors.primaryDark),
-      AppBadgeTone.success => (AppColors.successSoft, AppColors.successDark),
-      AppBadgeTone.warning => (AppColors.warningSoft, AppColors.warningDark),
-      AppBadgeTone.danger => (AppColors.dangerSoft, AppColors.dangerDark),
-      AppBadgeTone.seismic => (AppColors.dangerSoft, AppColors.seismicStrong),
+      AppBadgeTone.neutral => (palette.surfaceMuted, palette.textSecondary),
+      AppBadgeTone.info => (palette.infoSoft, palette.infoStrong),
+      AppBadgeTone.success => (palette.successSoft, palette.successStrong),
+      AppBadgeTone.warning => (palette.warningSoft, palette.warningStrong),
+      AppBadgeTone.danger => (palette.dangerSoft, palette.dangerStrong),
+      AppBadgeTone.seismic => (palette.dangerSoft, palette.dangerStrong),
     };
 
     return Semantics(

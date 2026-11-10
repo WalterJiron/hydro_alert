@@ -48,7 +48,7 @@ class AppLogo extends StatelessWidget {
               Text(
                 AppConfig.appTagline,
                 style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textMuted,
+                  color: context.palette.textMuted,
                 ),
               ),
           ],

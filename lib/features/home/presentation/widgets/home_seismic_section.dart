@@ -10,7 +10,7 @@ import '../../../alerts/presentation/viewmodels/alerts_viewmodel.dart';
 import '../../../alerts/presentation/widgets/seismic_event_card.dart';
 import 'home_unavailable_card.dart';
 
-/// Latest USGS earthquakes preview for the home dashboard.
+/// Latest INETER/USGS earthquakes preview for the home dashboard.
 class HomeSeismicSection extends ConsumerWidget {
   const HomeSeismicSection({super.key, required this.alerts});
 
@@ -35,7 +35,7 @@ class HomeSeismicSection extends ConsumerWidget {
               icon: LucideIcons.activity,
               title: 'Sin sismos recientes',
               message:
-                  'USGS no reporta eventos de magnitud 2.5 o superior en el área de Nicaragua durante los últimos 30 días.',
+                  'No hay eventos sísmicos reportados en el área de Nicaragua durante los últimos 30 días.',
             ),
           );
         }

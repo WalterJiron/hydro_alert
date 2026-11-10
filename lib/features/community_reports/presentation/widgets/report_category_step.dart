@@ -120,9 +120,10 @@ class _CategoryOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = reportCategoryColor(category);
+    final palette = context.palette;
 
     return Material(
-      color: selected ? AppColors.primarySoft : AppColors.surface,
+      color: selected ? palette.primarySoft : palette.surface,
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -132,7 +133,7 @@ class _CategoryOption extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: selected ? AppColors.primary : AppColors.border,
+              color: selected ? palette.primary : palette.border,
               width: selected ? 1.6 : 1,
             ),
           ),
@@ -157,8 +158,8 @@ class _CategoryOption extends StatelessWidget {
                   category.label,
                   style: AppTypography.labelMedium.copyWith(
                     color: selected
-                        ? AppColors.primaryDark
-                        : AppColors.textPrimary,
+                        ? palette.primaryStrong
+                        : palette.textPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 2,
@@ -166,11 +167,7 @@ class _CategoryOption extends StatelessWidget {
                 ),
               ),
               if (selected)
-                const Icon(
-                  LucideIcons.check,
-                  size: 16,
-                  color: AppColors.primary,
-                ),
+                Icon(LucideIcons.check, size: 16, color: palette.primary),
             ],
           ),
         ),

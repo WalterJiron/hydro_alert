@@ -46,3 +46,9 @@ app.*.map.json
 /android/.kotlin/
 /android/build/
 .gradle/
+
+# Agent instructions and transient specs (do not commit)
+AGENTS.md
+REPORTES_API.md
+WEBSOCKET_API.md
+.opencode/

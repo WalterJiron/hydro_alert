@@ -28,11 +28,12 @@ class InfoBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final (background, foreground) = switch (tone) {
-      InfoBannerTone.info => (AppColors.infoSoft, AppColors.primaryDark),
-      InfoBannerTone.warning => (AppColors.warningSoft, AppColors.warningDark),
-      InfoBannerTone.danger => (AppColors.dangerSoft, AppColors.dangerDark),
-      InfoBannerTone.success => (AppColors.successSoft, AppColors.successDark),
+      InfoBannerTone.info => (palette.infoSoft, palette.infoStrong),
+      InfoBannerTone.warning => (palette.warningSoft, palette.warningStrong),
+      InfoBannerTone.danger => (palette.dangerSoft, palette.dangerStrong),
+      InfoBannerTone.success => (palette.successSoft, palette.successStrong),
     };
 
     return Container(

@@ -21,9 +21,9 @@ Color reportCategoryColor(ReportCategory category) {
     ReportCategory.flood => AppColors.info,
     ReportCategory.damagedDrain => AppColors.warning,
     ReportCategory.fallenTree => AppColors.success,
-    ReportCategory.landslide => AppColors.warningDark,
+    ReportCategory.landslide => AppColors.brandOrange,
     ReportCategory.fire => AppColors.danger,
     ReportCategory.earthquakeDamage => AppColors.seismicStrong,
-    ReportCategory.other => AppColors.textMuted,
+    ReportCategory.other => AppColors.neutral,
   };
 }

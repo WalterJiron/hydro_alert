@@ -48,15 +48,15 @@ class SectionHeader extends StatelessWidget {
                 Text(
                   actionLabel!,
                   style: AppTypography.labelMedium.copyWith(
-                    color: AppColors.primary,
+                    color: context.palette.primary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(width: 2),
-                const Icon(
+                Icon(
                   Icons.chevron_right_rounded,
                   size: 18,
-                  color: AppColors.primary,
+                  color: context.palette.primary,
                 ),
               ],
             ),

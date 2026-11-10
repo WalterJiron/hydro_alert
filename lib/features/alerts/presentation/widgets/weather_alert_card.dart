@@ -16,23 +16,23 @@ class WeatherAlertCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return AppCard(
-      backgroundColor: alert.isActive
-          ? AppColors.warningSoft
-          : AppColors.surface,
+      backgroundColor: alert.isActive ? palette.warningSoft : palette.surface,
       borderColor: alert.isActive
           ? AppColors.warning.withValues(alpha: 0.3)
-          : AppColors.border,
+          : palette.border,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
+              Icon(
                 LucideIcons.cloudLightning,
                 size: 22,
-                color: AppColors.warningDark,
+                color: palette.warningStrong,
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -56,11 +56,7 @@ class WeatherAlertCard extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              const Icon(
-                LucideIcons.clock,
-                size: 14,
-                color: AppColors.textMuted,
-              ),
+              Icon(LucideIcons.clock, size: 14, color: palette.textMuted),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(

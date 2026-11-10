@@ -21,12 +21,12 @@ IconData weatherIconFor(String main, String iconCode) {
   };
 }
 
-Color weatherColorFor(String main) {
+Color weatherColorFor(String main, AppPalette palette) {
   return switch (main.toLowerCase()) {
     'clear' => AppColors.warning,
     'rain' || 'drizzle' || 'thunderstorm' => AppColors.info,
-    'snow' => AppColors.primary,
-    'mist' || 'fog' || 'haze' || 'smoke' => AppColors.textMuted,
-    _ => AppColors.primary,
+    'snow' => palette.primary,
+    'mist' || 'fog' || 'haze' || 'smoke' => palette.textMuted,
+    _ => palette.primary,
   };
 }

@@ -18,11 +18,10 @@ class WelcomeView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final auth = ref.watch(authViewModelProvider);
-    final isLoading = auth.isLoading;
-
+    // Guest browsing never waits on auth restoration. The session is loaded
+    // lazily when the user continues or opens the account sheet.
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.palette.background,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -67,7 +66,7 @@ class WelcomeView extends ConsumerWidget {
                         icon: LucideIcons.activity,
                         title: 'Actividad sísmica',
                         description:
-                            'Eventos recientes del Servicio Geológico de EE. UU. (USGS).',
+                            'Eventos recientes de INETER, con respaldo de USGS si el servicio no está disponible.',
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -99,7 +98,7 @@ class WelcomeView extends ConsumerWidget {
                         title: 'Importante',
                         message:
                             'HydroAlert no sustituye a las autoridades. '
-                            'Los eventos de USGS no son alertas oficiales de evacuación.',
+                            'Los eventos sísmicos no son alertas oficiales de evacuación.',
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -109,7 +108,6 @@ class WelcomeView extends ConsumerWidget {
                         label: 'Continuar como invitado',
                         icon: LucideIcons.arrowRight,
                         expand: true,
-                        isLoading: isLoading,
                         onPressed: () async {
                           await ref
                               .read(authViewModelProvider.notifier)

@@ -114,7 +114,7 @@ class _RouteErrorView extends StatelessWidget {
               Text(
                 'La ruta que intentaste abrir no existe.',
                 style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.textMuted,
+                  color: context.palette.textMuted,
                 ),
                 textAlign: TextAlign.center,
               ),

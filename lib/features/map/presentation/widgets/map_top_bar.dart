@@ -9,7 +9,7 @@ import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/atoms/app_logo.dart';
 import '../../../../shared/atoms/status_indicator.dart';
 
-/// Floating header of the map with app brand, USGS live status, and legend entry.
+/// Floating header of the map with app brand, seismic source and legend entry.
 class MapTopBar extends StatelessWidget {
   const MapTopBar({
     super.key,
@@ -17,18 +17,20 @@ class MapTopBar extends StatelessWidget {
     required this.alertsAvailable,
     required this.onOpenLegend,
     this.alertsCount,
+    this.sourceLabel,
   });
 
   final bool alertsLoading;
   final bool alertsAvailable;
   final VoidCallback onOpenLegend;
   final int? alertsCount;
+  final String? sourceLabel;
 
   @override
   Widget build(BuildContext context) {
     final statusLabel = alertsLoading
         ? 'Sincronizando'
-        : (alertsAvailable ? 'USGS' : 'Sin conexión');
+        : (alertsAvailable ? (sourceLabel ?? 'Sismos') : 'Sin conexión');
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
@@ -37,9 +39,11 @@ class MapTopBar extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.fromLTRB(10, 5, 5, 5),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.94),
+            color: context.palette.mapPanel,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.border.withValues(alpha: 0.8)),
+            border: Border.all(
+              color: context.palette.border.withValues(alpha: 0.8),
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.08),
@@ -62,17 +66,20 @@ class MapTopBar extends StatelessWidget {
               const Spacer(),
               if (alertsCount != null && alertsCount! > 0) ...[
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
-                    color: AppColors.primarySoft,
+                    color: context.palette.primarySoft,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     '$alertsCount sismos',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.primaryDark,
+                      color: context.palette.primaryStrong,
                     ),
                   ),
                 ),
@@ -85,7 +92,7 @@ class MapTopBar extends StatelessWidget {
                 },
                 tooltip: 'Leyenda del mapa',
                 icon: const Icon(LucideIcons.info, size: 18),
-                color: AppColors.textSecondary,
+                color: context.palette.textSecondary,
                 style: IconButton.styleFrom(
                   minimumSize: const Size(36, 36),
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,

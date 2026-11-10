@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../app/constants/api_endpoints.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
-import '../../../../core/utils/external_link.dart';
 import '../../../../shared/molecules/info_banner.dart';
 import '../../../community_reports/domain/entities/report_category.dart';
 import '../../../community_reports/presentation/widgets/report_category_visuals.dart';
@@ -36,7 +34,7 @@ Future<void> showMapLegendSheet(
               const SizedBox(height: 18),
               const _SectionTitle(
                 icon: LucideIcons.activity,
-                label: 'Sismos (USGS)',
+                label: 'Sismos (INETER)',
               ),
               const SizedBox(height: 8),
               for (final magnitude in const [3.2, 4.5, 5.4, 6.2])
@@ -57,7 +55,7 @@ Future<void> showMapLegendSheet(
                         '${seismicLevelLabel(magnitude)} · '
                         '${_magnitudeRange(magnitude)}',
                         style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.palette.textSecondary,
                         ),
                       ),
                     ],
@@ -110,25 +108,11 @@ Future<void> showMapLegendSheet(
                 icon: LucideIcons.shieldAlert,
                 tone: InfoBannerTone.warning,
                 message:
-                    'Los eventos de USGS no son alertas oficiales de '
-                    'evacuación. Sigue siempre las indicaciones de las '
+                    'Los eventos sísmicos de INETER no son alertas oficiales '
+                    'de evacuación. Sigue siempre las indicaciones de las '
                     'autoridades.',
               ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 14,
-                runSpacing: 4,
-                children: [
-                  _AttributionLink(
-                    label: '© Google Maps',
-                    url: ApiEndpoints.googleMapsSite,
-                  ),
-                  _AttributionLink(
-                    label: 'RainViewer',
-                    url: ApiEndpoints.rainViewerSite,
-                  ),
-                ],
-              ),
+              // const SizedBox(height: 16),
             ],
           ),
         ),
@@ -160,7 +144,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: AppColors.textSecondary),
+        Icon(icon, size: 16, color: context.palette.textSecondary),
         const SizedBox(width: 6),
         Text(label, style: AppTypography.titleSmall),
       ],
@@ -194,34 +178,6 @@ class _CategoryChip extends StatelessWidget {
             style: AppTypography.labelSmall.copyWith(color: color),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _AttributionLink extends StatelessWidget {
-  const _AttributionLink({required this.label, required this.url});
-
-  final String label;
-  final String url;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () async {
-        await openExternalUrl(url);
-      },
-      borderRadius: BorderRadius.circular(4),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Text(
-          label,
-          style: AppTypography.labelSmall.copyWith(
-            color: AppColors.textSecondary,
-            decoration: TextDecoration.underline,
-            decorationColor: AppColors.textMuted,
-          ),
-        ),
       ),
     );
   }

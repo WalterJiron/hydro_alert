@@ -32,9 +32,11 @@ class MapControls extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.94),
+            color: context.palette.mapPanel,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.border.withValues(alpha: 0.8)),
+            border: Border.all(
+              color: context.palette.border.withValues(alpha: 0.8),
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.08),
@@ -65,7 +67,7 @@ class MapControls extends StatelessWidget {
               Container(
                 width: 20,
                 height: 1,
-                color: AppColors.border.withValues(alpha: 0.8),
+                color: context.palette.border.withValues(alpha: 0.8),
                 margin: const EdgeInsets.symmetric(vertical: 3),
               ),
               _MapControlButton(
@@ -112,16 +114,16 @@ class _MapControlButton extends StatelessWidget {
       onPressed: isLoading ? null : onPressed,
       tooltip: tooltip,
       icon: isLoading
-          ? const SizedBox(
+          ? SizedBox(
               width: 16,
               height: 16,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: AppColors.primary,
+                color: context.palette.primary,
               ),
             )
           : Icon(icon, size: 18),
-      color: AppColors.textSecondary,
+      color: context.palette.textSecondary,
       style: IconButton.styleFrom(
         minimumSize: const Size(40, 40),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,

@@ -18,19 +18,25 @@ class CommunityReportCta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return AppCard(
-      backgroundColor: AppColors.primarySoft,
-      borderColor: AppColors.primary.withValues(alpha: 0.18),
+      backgroundColor: palette.primarySoft,
+      borderColor: palette.primary.withValues(alpha: 0.18),
       child: Row(
         children: [
           Container(
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.primary,
+              color: palette.primaryFill,
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(LucideIcons.plus, color: Colors.white, size: 24),
+            child: Icon(
+              LucideIcons.plus,
+              color: palette.onPrimaryFill,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -56,8 +62,10 @@ class CommunityReportCta extends StatelessWidget {
             onPressed: enabled ? onTap : null,
             tooltip: 'Crear reporte',
             style: IconButton.styleFrom(
-              backgroundColor: enabled ? AppColors.primary : AppColors.surface,
-              foregroundColor: enabled ? Colors.white : AppColors.textMuted,
+              backgroundColor: enabled ? palette.primaryFill : palette.surface,
+              foregroundColor: enabled
+                  ? palette.onPrimaryFill
+                  : palette.textMuted,
             ),
             icon: const Icon(LucideIcons.arrowRight, size: 20),
           ),

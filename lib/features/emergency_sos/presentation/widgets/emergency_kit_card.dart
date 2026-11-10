@@ -20,6 +20,8 @@ class EmergencyKitCard extends StatelessWidget {
       (LucideIcons.batteryCharging, 'Batería'),
     ];
 
+    final palette = context.palette;
+
     return AppCard(
       child: Wrap(
         spacing: 8,
@@ -29,13 +31,13 @@ class EmergencyKitCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
               decoration: BoxDecoration(
-                color: AppColors.surfaceMuted,
+                color: palette.surfaceMuted,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(item.$1, size: 15, color: AppColors.textSecondary),
+                  Icon(item.$1, size: 15, color: palette.textSecondary),
                   const SizedBox(width: 5),
                   Text(item.$2, style: AppTypography.labelSmall),
                 ],

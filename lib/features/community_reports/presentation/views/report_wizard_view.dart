@@ -6,6 +6,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/config/app_config.dart';
 import '../../../../shared/molecules/info_banner.dart';
 import '../../../../shared/motion/app_animated_switcher.dart';
+import '../../../auth/presentation/viewmodels/auth_viewmodel.dart';
+import '../../../auth/presentation/widgets/auth_sheet.dart';
 import '../services/report_photo_picker.dart';
 import '../viewmodels/report_wizard_state.dart';
 import '../viewmodels/report_wizard_viewmodel.dart';
@@ -43,6 +45,8 @@ class _ReportWizardViewState extends ConsumerState<ReportWizardView> {
   Widget build(BuildContext context) {
     final state = ref.watch(reportWizardViewModelProvider);
     final viewModel = ref.read(reportWizardViewModelProvider.notifier);
+    final isAuthenticated =
+        ref.watch(authViewModelProvider).value?.isAuthenticated ?? false;
 
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
@@ -101,7 +105,17 @@ class _ReportWizardViewState extends ConsumerState<ReportWizardView> {
                         onDescriptionChanged: viewModel.updateDescription,
                         onContinue: viewModel.goToEvidence,
                       )
-                    else
+                    else ...[
+                      if (!isAuthenticated) ...[
+                        const InfoBanner(
+                          icon: LucideIcons.userRound,
+                          title: 'Cuenta de reportante',
+                          message:
+                              'Al enviar te pediremos iniciar sesión o crear una '
+                              'cuenta. Solo se usa para publicar reportes.',
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                       ReportEvidenceStep(
                         state: state,
                         photoError: _photoError,
@@ -110,8 +124,9 @@ class _ReportWizardViewState extends ConsumerState<ReportWizardView> {
                         onPickGallery: _pickFromGallery,
                         onRemovePhoto: viewModel.removePhoto,
                         onBack: viewModel.goBack,
-                        onSubmit: viewModel.submit,
+                        onSubmit: _submit,
                       ),
+                    ],
                   ],
                 ),
         ),
@@ -122,6 +137,19 @@ class _ReportWizardViewState extends ConsumerState<ReportWizardView> {
   Future<void> _pickFromCamera() => _pickPhoto(_photoPicker.pickFromCamera);
 
   Future<void> _pickFromGallery() => _pickPhoto(_photoPicker.pickFromGallery);
+
+  Future<void> _submit() async {
+    final isAuthenticated =
+        ref.read(authViewModelProvider).value?.isAuthenticated ?? false;
+    if (!isAuthenticated) {
+      final authenticated = await showAuthSheet(context);
+      if (!authenticated || !mounted) {
+        return;
+      }
+    }
+
+    await ref.read(reportWizardViewModelProvider.notifier).submit();
+  }
 
   Future<void> _pickPhoto(Future<ReportPhoto?> Function() pick) async {
     try {

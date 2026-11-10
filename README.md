@@ -2,7 +2,7 @@
 
 **Información que protege.** Aplicación móvil Flutter para Nicaragua que reúne actividad sísmica, clima, un mapa operativo y reportes comunitarios en una interfaz de baja carga cognitiva.
 
-> HydroAlert es una herramienta informativa. No sustituye a SINAPRED, INETER, cuerpos de emergencia ni a ninguna autoridad. Los eventos de USGS **no** son alertas oficiales de evacuación y los reportes comunitarios **no están verificados**.
+> HydroAlert es una herramienta informativa. No sustituye a SINAPRED, INETER, cuerpos de emergencia ni a ninguna autoridad. Los eventos sísmicos de INETER (o del respaldo de USGS) **no** son alertas oficiales de evacuación y los reportes comunitarios **no están verificados**.
 
 ## Funcionalidad
 
@@ -10,11 +10,13 @@
 | --- | --- |
 | **Inicio** | Resumen del día, clima actual, últimos sismos, reportes recientes y acceso rápido a la guía de emergencia. |
 | **Mapa** | Google Maps con marcadores personalizados de sismos y reportes, ubicación del usuario y radar RainViewer opcional. |
-| **Reportes** | Lista de reportes comunitarios activos y asistente de dos pasos para crear uno con foto y ubicación. |
-| **Alertas** | Pestañas de sismos USGS y avisos meteorológicos de WeatherAPI con detalle y enlace a la fuente. |
+| **Reportes** | Lista de reportes comunitarios activos y asistente de dos pasos para crear uno con foto y ubicación. Publicar requiere una cuenta de reportante; explorar no. |
+| **Alertas** | Pestañas de sismos de INETER (respaldo USGS) y avisos meteorológicos de WeatherAPI con detalle y enlace a la fuente. |
 | **Emergencia** | Guía visual de actuación y modo SOS visual a pantalla completa. No llama, no envía ubicación y no despacha ayuda. |
 
-La app inicia con acceso como invitado. No hay credenciales de autenticación ni backend de cuentas en esta entrega.
+El mapa, el inicio, las alertas y la lista de reportes están disponibles como invitado. Solo publicar un reporte requiere crear una cuenta o iniciar sesión; la sesión se guarda localmente y nunca bloquea la navegación.
+
+La interfaz sigue automáticamente el tema claro u oscuro configurado en el dispositivo (`ThemeMode.system`); no hay un selector manual dentro de la app.
 
 ## Stack
 
@@ -23,10 +25,11 @@ La app inicia con acceso como invitado. No hay credenciales de autenticación ni
 - Freezed 3 y `json_serializable`.
 - `go_router` con `StatefulShellRoute` de cinco ramas.
 - `google_maps_flutter` + Google Maps + RainViewer.
-- Dio para USGS, WeatherAPI, OpenWeatherMap (respaldo) y el backend NestJS.
+- Dio para el backend FastAPI, USGS, WeatherAPI y OpenWeatherMap (respaldo).
+- `shared_preferences` para persistir la sesión y `web_socket_channel` para reportes y notificaciones en tiempo real.
 - Firebase Core / Messaging **opcional**.
 - `image_picker` para cámara/galería y `geolocator` para ubicación bajo demanda.
-- Arquitectura Screaming Architecture + MVVM, componentes compartidos inspirados en Atomic Design y tokens centralizados (`AppColors`, `AppTypography`, `AppTheme`).
+- Arquitectura Screaming Architecture + MVVM, componentes compartidos inspirados en Atomic Design y tokens centralizados (`AppColors`, `AppPalette`, `AppTypography`, `AppTheme`).
 
 ## Estructura
 
@@ -40,11 +43,11 @@ lib/
 ├── core/
 │   ├── errors/          # fallos de usuario
 │   ├── network/         # clientes Dio y mapeo de errores
-│   ├── services/        # ubicación, notificaciones y push
+│   ├── services/        # ubicación, notificaciones, push y WebSocket
 │   └── utils/           # fechas en español y mensajes de error
 ├── features/
-│   ├── alerts/          # USGS, WeatherAPI, OpenWeather (respaldo) y sus vistas
-│   ├── auth/            # acceso invitado
+│   ├── alerts/          # INETER (respaldo USGS), WeatherAPI y OpenWeather
+│   ├── auth/            # cuentas de reportante, invitado y sesión persistida
 │   ├── community_reports/ # reportes y asistente
 │   ├── emergency_sos/   # guía y overlay crítico
 │   ├── home/            # tablero
@@ -76,7 +79,7 @@ Nunca se guardan secretos en el repositorio. Usa `--dart-define`:
 | --- | --- | --- |
 | `WEATHERAPI_KEY` | No | Clave de WeatherAPI (fuente primaria del clima y sus avisos). Sin ella ni `OPENWEATHER_API_KEY`, el clima muestra un estado no disponible. |
 | `OPENWEATHER_API_KEY` | No | Clave de OpenWeatherMap One Call 3.0, usada solo como respaldo cuando WeatherAPI falla. |
-| `API_BASE_URL` | No | URL base del backend NestJS de reportes. Sin ella, los reportes quedan deshabilitados. |
+| `API_BASE_URL` | No | URL base del backend FastAPI. Por defecto usa `http://10.0.2.2:8000/api/v1` en el emulador Android y `http://localhost:8000/api/v1` en el resto. Si se omite el prefijo `/api/v1`, se agrega automáticamente. |
 | `FIREBASE_ENABLED` | No | `true` activa Firebase Messaging. Por defecto `false`. |
 | `SOS_MAGNITUDE_THRESHOLD` | No | Magnitud mínima para el overlay crítico. Por defecto `5.0`. |
 | `SOS_EVENT_MAX_AGE_MINUTES` | No | Antigüedad máxima de un sismo para el overlay. Por defecto `15`. |
@@ -88,9 +91,13 @@ Ejemplo:
 ```bash
 flutter run \
   --dart-define=WEATHERAPI_KEY=tu_clave \
-  --dart-define=API_BASE_URL=https://tu-backend.vercel.app/api/v1 \
+  --dart-define=API_BASE_URL=http://localhost:8000/api/v1 \
   --dart-define=FIREBASE_ENABLED=false
 ```
+
+En un dispositivo físico, reemplaza `localhost` por la IP de la máquina que ejecuta el backend, por ejemplo `http://192.168.1.20:8000/api/v1`.
+
+Para desarrollo local, Android permite HTTP solo en las variantes debug/profile (`src/debug` y `src/profile`); los builds release mantienen `usesCleartextTraffic="false"`. iOS permite redes locales con `NSAllowsLocalNetworking`. En producción usa `https://` y `wss://`.
 
 ### Google Maps
 
@@ -119,11 +126,21 @@ El mapa base usa el SDK nativo de Google Maps.
 
 ## Fuentes de datos y límites
 
-### USGS
+### INETER (primaria)
+
+- El backend FastAPI sincroniza los eventos de INETER y los expone en `GET {API_BASE_URL}/seismic-events`.
+- Parámetros usados por la app: `page=1`, `page_size=100` y `from_date` con los últimos 30 días.
+- Campos leídos: `id`, `event_at` (o `event_date` + `event_time`), `latitude`, `longitude`, `depth_km`, `magnitude`, `location`, `pais`, `status`, `source`.
+- Si `event_at` falta, la app interpreta `event_date`/`event_time` como hora local de Nicaragua (UTC-6).
+- Los eventos se muestran con la etiqueta de su fuente; una lista vacía de INETER se muestra como estado vacío y **no** activa el respaldo.
+- Si el backend o INETER fallan, se consulta USGS como respaldo.
+
+### USGS (respaldo)
 
 - Endpoint: `https://earthquake.usgs.gov/fdsnws/event/1/query`.
 - Filtro para Nicaragua: latitud `10.7..15.0`, longitud `-87.7..-82.5`.
 - Magnitud mínima `2.5`, orden por tiempo, ventana de 30 días, límite 50.
+- Solo se consulta cuando el backend/INETER no está disponible.
 - Los registros se muestran como información de USGS, nunca como alerta oficial de evacuación.
 
 ### WeatherAPI (primaria)
@@ -147,16 +164,32 @@ El mapa base usa el SDK nativo de Google Maps.
 - RainViewer sirve teselas de radar hasta **zoom 7**; por encima, la app recorta y amplía la tesela padre de zoom 7 en lugar de pedir niveles inexistentes.
 - Se muestra atribución de Google Maps (logotipo del mapa) y RainViewer cuando la capa está activa. La leyenda incluye los créditos completos.
 
+### Cuentas de reportante
+
+- `POST {API_BASE_URL}/auth/register` con `name`, `email`, `password` y `cedula`; responde `{ token, user: { id, name, email } }`.
+- `POST {API_BASE_URL}/auth/login` con `email` y `password`; devuelve la misma estructura.
+- La cédula debe tener el formato `000-000000-0000A` y la contraseña al menos 8 caracteres.
+- El token se guarda con `shared_preferences`; cerrar sesión lo elimina.
+- Sin cuenta se puede explorar la app completa. El asistente de reportes abre la hoja de acceso solo al enviar.
+
 ### Reportes comunitarios
 
-**Contrato provisional.** La especificación OpenAPI del backend NestJS todavía no fue entregada. La implementación actual asume:
-
-- `GET {API_BASE_URL}/reports/active` → lista o `{ data | reports | items: [...] }`.
-- `POST {API_BASE_URL}/reports` multipart con `category`, `description`, `latitude`, `longitude` y `photo` opcional.
+- `GET {API_BASE_URL}/reports/active` es público y no requiere token.
+- `POST {API_BASE_URL}/reports` usa multipart con `category`, `description`, `latitude`, `longitude` y `photo` opcional; exige `Authorization: Bearer <token>`.
 - Categorías en el cable: `flood`, `damaged_drain`, `fallen_tree`, `landslide`, `fire`, `earthquake_damage`, `other`.
-- Campos tolerados en lectura: `id`/`_id`, `photoUrl`/`photo_url`, `createdAt`/`created_at`.
+- La foto puede ser una URL absoluta (Supabase) o una ruta relativa como `/api/v1/reports/photos/{id}`; ambas se resuelven contra el origen del API.
+- La app tolera variantes de campos en lectura: `id`/`_id`, `photoUrl`/`photo_url`, `createdAt`/`created_at`.
+- Los mensajes del backend llegan en inglés y se traducen a español para el usuario (`email_already_registered`, `cedula_already_registered`, `invalid_credentials`, `invalid_token`, `photo_too_large`, `unsupported_photo`, `rate_limited`, entre otros).
+- Todos los reportes se muestran con la etiqueta **Sin verificar**; nunca se presentan como alertas oficiales.
 
-Estos nombres deben validarse contra el Swagger real antes de producción. Todos los reportes se muestran con la etiqueta **Sin verificar**; nunca se presentan como alertas oficiales. Sin `API_BASE_URL`, el envío y la consulta quedan deshabilitados con un mensaje claro.
+### Tiempo real (WebSocket)
+
+- Endpoint: `ws://{host}:8000/api/v1/ws?channels=reports,notifications` (`wss://` en producción).
+- Es público: no requiere token y la app entra como invitada.
+- Eventos: `connection.ready`, `report.created`, `report.deleted`, `notification.created`, `pong` y `error`.
+- La app envía `{"action":"ping","sentAt":"..."}` cada 30 s, reanuda con `lastEventId` y reconecta con retroceso exponencial.
+- `report.created` y `report.deleted` refrescan la lista de reportes en silencio.
+- `notification.created` alimenta el overlay crítico de emergencia.
 
 ## Firebase (opcional)
 
@@ -167,7 +200,7 @@ La app funciona completamente sin Firebase. Para habilitar notificaciones push:
 3. Aplica el plugin de Google Services en Android y sube los archivos a la configuración de iOS.
 4. Compila con `--dart-define=FIREBASE_ENABLED=true`.
 
-Sin esos archivos, `NotificationService` captura el fallo, lo registra y la app sigue funcionando. El overlay crítico también reacciona a sismos recientes de USGS según el umbral configurado, sin depender de Firebase.
+Sin esos archivos, `NotificationService` captura el fallo, lo registra y la app sigue funcionando. El overlay crítico también reacciona a sismos recientes de INETER publicados por el backend, a notificaciones en tiempo real y a mensajes push, según el umbral configurado, sin depender de Firebase.
 
 ## SOS visual
 
@@ -188,17 +221,16 @@ El botón de emergencia y el overlay **no** realizan llamadas, **no** envían me
 ## Validación
 
 ```bash
-dart format .
+dart format lib test
 flutter analyze
 flutter test
 ```
 
-Estado actual: `flutter analyze` sin incidencias y pruebas de widget aprobadas.
+Estado actual: `flutter analyze` sin incidencias y pruebas unitarias y de widget aprobadas.
 
 ## Pendientes conocidos
 
-- Confirmar el contrato OpenAPI del backend NestJS y la URL real de Vercel.
+- Configurar `API_BASE_URL` del backend FastAPI desplegado y usar `wss://` en producción.
 - Configurar la clave de WeatherAPI para habilitar clima y avisos (OpenWeatherMap es opcional como respaldo).
 - Configurar Firebase si se requieren notificaciones push.
-- Implementar autenticación real cuando exista el servicio de cuentas.
 - Configurar firma de release para Android e iOS.

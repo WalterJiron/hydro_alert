@@ -27,7 +27,7 @@ abstract class EmergencyEvent with _$EmergencyEvent {
 
   String get sourceLabel {
     return switch (source) {
-      EmergencySource.seismic => 'Evento sísmico · USGS',
+      EmergencySource.seismic => 'Evento sísmico · INETER',
       EmergencySource.push => 'Notificación de emergencia',
     };
   }

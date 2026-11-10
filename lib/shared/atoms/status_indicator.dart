@@ -18,7 +18,8 @@ class StatusIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = isActive ? color : AppColors.textMuted;
+    final palette = context.palette;
+    final effectiveColor = isActive ? color : palette.textMuted;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -35,7 +36,7 @@ class StatusIndicator extends StatelessWidget {
         Text(
           label,
           style: AppTypography.labelSmall.copyWith(
-            color: isActive ? AppColors.textSecondary : AppColors.textMuted,
+            color: isActive ? palette.textSecondary : palette.textMuted,
             fontWeight: FontWeight.w600,
           ),
         ),

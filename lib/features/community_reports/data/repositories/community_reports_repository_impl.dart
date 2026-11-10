@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../app/config/app_config.dart';
 import '../../../../core/network/network_providers.dart';
+import '../../../auth/data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/community_report.dart';
 import '../../domain/entities/report_category.dart';
 import '../../domain/entities/report_draft.dart';
@@ -33,7 +35,7 @@ class CommunityReportsRepositoryImpl implements CommunityReportsRepository {
       latitude: model.latitude,
       longitude: model.longitude,
       createdAt: model.createdAt,
-      photoUrl: model.photoUrl,
+      photoUrl: AppConfig.resolveMediaUrl(model.photoUrl),
       isVerified: false,
     );
   }
@@ -42,7 +44,10 @@ class CommunityReportsRepositoryImpl implements CommunityReportsRepository {
 final communityReportsRepositoryProvider = Provider<CommunityReportsRepository>(
   (ref) {
     return CommunityReportsRepositoryImpl(
-      CommunityReportsRemoteDataSource(ref.watch(backendDioProvider)),
+      CommunityReportsRemoteDataSource(
+        ref.watch(backendDioProvider),
+        ref.watch(authRepositoryProvider),
+      ),
     );
   },
 );

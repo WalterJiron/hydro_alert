@@ -37,6 +37,8 @@ class MapLayerBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
       child: BackdropFilter(
@@ -44,9 +46,9 @@ class MapLayerBar extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(5),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.94),
+            color: palette.mapPanel,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: AppColors.border.withValues(alpha: 0.8)),
+            border: Border.all(color: palette.border.withValues(alpha: 0.8)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.08),
@@ -64,7 +66,7 @@ class MapLayerBar extends StatelessWidget {
                   count: earthquakeCount,
                   selected: earthquakesSelected,
                   color: AppColors.info,
-                  foreground: AppColors.primaryDark,
+                  foreground: palette.primaryStrong,
                   onTap: onToggleEarthquakes,
                 ),
               ),
@@ -80,7 +82,7 @@ class MapLayerBar extends StatelessWidget {
                     count: reportsEnabled ? reportCount : null,
                     selected: reportsSelected,
                     color: AppColors.warning,
-                    foreground: AppColors.warningDark,
+                    foreground: palette.warningStrong,
                     onTap: onToggleReports,
                   ),
                 ),
@@ -91,8 +93,8 @@ class MapLayerBar extends StatelessWidget {
                   icon: LucideIcons.radar,
                   label: 'Radar',
                   selected: radarSelected,
-                  color: AppColors.primary,
-                  foreground: AppColors.primaryDark,
+                  color: palette.primary,
+                  foreground: palette.primaryStrong,
                   isLoading: radarLoading,
                   onTap: onToggleRadar,
                 ),
@@ -130,9 +132,10 @@ class _LayerSegment extends StatelessWidget {
   Widget build(BuildContext context) {
     final isEnabled = onTap != null;
     final isSelected = selected && isEnabled;
+    final palette = context.palette;
     final effectiveForeground = isEnabled
-        ? (isSelected ? foreground : AppColors.textSecondary)
-        : AppColors.textMuted;
+        ? (isSelected ? foreground : palette.textSecondary)
+        : palette.textMuted;
 
     return Semantics(
       button: true,
@@ -169,10 +172,7 @@ class _LayerSegment extends StatelessWidget {
                     }
                   : null,
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 9,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 9),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
@@ -220,7 +220,7 @@ class _LayerSegment extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: isSelected
                               ? color.withValues(alpha: 0.22)
-                              : AppColors.surfaceMuted,
+                              : palette.surfaceMuted,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -229,9 +229,7 @@ class _LayerSegment extends StatelessWidget {
                             fontSize: 9,
                             height: 1.1,
                             fontWeight: FontWeight.w800,
-                            color: isSelected
-                                ? foreground
-                                : AppColors.textMuted,
+                            color: isSelected ? foreground : palette.textMuted,
                           ),
                         ),
                       ),

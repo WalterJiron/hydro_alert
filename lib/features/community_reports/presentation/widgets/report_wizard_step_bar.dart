@@ -54,12 +54,13 @@ class _StepSegment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final background = isActive || isComplete
-        ? AppColors.primary
-        : AppColors.surfaceMuted;
+        ? palette.primaryFill
+        : palette.surfaceMuted;
     final foreground = isActive || isComplete
-        ? Colors.white
-        : AppColors.textMuted;
+        ? palette.onPrimaryFill
+        : palette.textMuted;
 
     return Expanded(
       child: AnimatedContainer(
@@ -67,10 +68,10 @@ class _StepSegment extends StatelessWidget {
         curve: AppMotion.curve,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.primarySoft : AppColors.surface,
+          color: isActive ? palette.primarySoft : palette.surface,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isActive ? AppColors.primary : AppColors.border,
+            color: isActive ? palette.primary : palette.border,
           ),
         ),
         child: Row(
@@ -86,7 +87,11 @@ class _StepSegment extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: isComplete
-                  ? const Icon(LucideIcons.check, size: 12, color: Colors.white)
+                  ? Icon(
+                      LucideIcons.check,
+                      size: 12,
+                      color: palette.onPrimaryFill,
+                    )
                   : Text(
                       '$number',
                       style: AppTypography.labelSmall.copyWith(
@@ -100,7 +105,7 @@ class _StepSegment extends StatelessWidget {
               child: Text(
                 label,
                 style: AppTypography.labelMedium.copyWith(
-                  color: isActive ? AppColors.primary : AppColors.textMuted,
+                  color: isActive ? palette.primary : palette.textMuted,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
                 ),
                 overflow: TextOverflow.ellipsis,

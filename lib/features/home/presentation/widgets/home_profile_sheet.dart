@@ -8,10 +8,12 @@ import '../../../../shared/atoms/app_logo.dart';
 import '../../../../shared/atoms/custom_button.dart';
 import '../../../../shared/molecules/info_banner.dart';
 import '../../../auth/presentation/viewmodels/auth_viewmodel.dart';
+import '../../../auth/presentation/widgets/auth_sheet.dart';
 
-/// Shows the guest profile sheet from the home app bar.
+/// Shows the profile sheet from the home app bar.
 Future<void> showHomeProfileSheet(BuildContext context, WidgetRef ref) {
-  final user = ref.read(authViewModelProvider).value;
+  final session = ref.read(authViewModelProvider).value;
+  final isAuthenticated = session?.isAuthenticated ?? false;
 
   return showModalBottomSheet<void>(
     context: context,
@@ -28,12 +30,14 @@ Future<void> showHomeProfileSheet(BuildContext context, WidgetRef ref) {
               const AppLogo(size: 44, showWordmark: true, showTagline: true),
               const SizedBox(height: 18),
               Text(
-                user?.displayName ?? 'Invitado',
+                session?.user.displayName ?? 'Invitado',
                 style: AppTypography.titleMedium,
               ),
               const SizedBox(height: 2),
               Text(
-                'Acceso como invitado. No se requiere cuenta.',
+                isAuthenticated
+                    ? (session?.user.email ?? 'Cuenta de reportante')
+                    : 'Acceso como invitado. No se requiere cuenta para explorar.',
                 style: AppTypography.bodySmall,
               ),
               const SizedBox(height: 18),
@@ -41,13 +45,34 @@ Future<void> showHomeProfileSheet(BuildContext context, WidgetRef ref) {
                 icon: LucideIcons.info,
                 title: 'Sobre los datos',
                 message:
-                    'Sismos: USGS. Clima: condiciones y avisos meteorológicos. '
-                    'Los reportes comunitarios no están verificados. '
+                    'Sismos: INETER (respaldo USGS). Clima: condiciones y avisos '
+                    'meteorológicos. Los reportes comunitarios no están verificados. '
                     'HydroAlert no sustituye a las autoridades.',
               ),
               const SizedBox(height: 14),
+              if (!isAuthenticated) ...[
+                CustomButton(
+                  label: 'Iniciar sesión o crear cuenta',
+                  icon: LucideIcons.logIn,
+                  expand: true,
+                  onPressed: () async {
+                    Navigator.of(sheetContext).pop();
+                    if (context.mounted) {
+                      await showAuthSheet(context);
+                    }
+                  },
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Solo se solicita una cuenta al publicar un reporte.',
+                  style: AppTypography.labelSmall,
+                ),
+                const SizedBox(height: 8),
+              ],
               CustomButton(
-                label: 'Cerrar sesión',
+                label: isAuthenticated
+                    ? 'Cerrar sesión'
+                    : 'Salir del modo invitado',
                 icon: LucideIcons.logOut,
                 variant: AppButtonVariant.ghost,
                 expand: true,

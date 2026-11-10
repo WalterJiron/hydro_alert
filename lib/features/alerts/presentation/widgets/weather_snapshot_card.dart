@@ -17,7 +17,7 @@ class WeatherSnapshotCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = weatherColorFor(snapshot.weatherMain);
+    final color = weatherColorFor(snapshot.weatherMain, context.palette);
     final activeAlerts = snapshot.alerts
         .where((alert) => alert.isActive)
         .toList();
@@ -96,16 +96,16 @@ class WeatherSnapshotCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.warningSoft,
+                color: context.palette.warningSoft,
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
+                  Icon(
                     LucideIcons.triangleAlert,
                     size: 18,
-                    color: AppColors.warningDark,
+                    color: context.palette.warningStrong,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -115,7 +115,7 @@ class WeatherSnapshotCard extends StatelessWidget {
                         Text(
                           activeAlerts.first.event,
                           style: AppTypography.titleSmall.copyWith(
-                            color: AppColors.warningDark,
+                            color: context.palette.warningStrong,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -123,7 +123,7 @@ class WeatherSnapshotCard extends StatelessWidget {
                           '${activeAlerts.first.senderName} · '
                           '${DateFormatter.shortDateTime(activeAlerts.first.start)}',
                           style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.warningDark,
+                            color: context.palette.warningStrong,
                           ),
                         ),
                       ],
@@ -150,7 +150,7 @@ class _Metric extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 15, color: AppColors.textMuted),
+        Icon(icon, size: 15, color: context.palette.textMuted),
         const SizedBox(width: 5),
         Text(label, style: AppTypography.bodySmall),
       ],

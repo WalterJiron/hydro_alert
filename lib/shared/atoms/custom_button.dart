@@ -107,16 +107,18 @@ class AppIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return IconButton(
       onPressed: isLoading ? null : onPressed,
       tooltip: tooltip,
       style: IconButton.styleFrom(
-        backgroundColor: isActive ? AppColors.primarySoft : AppColors.surface,
-        foregroundColor: isActive ? AppColors.primary : AppColors.textSecondary,
+        backgroundColor: isActive ? palette.primarySoft : palette.surface,
+        foregroundColor: isActive ? palette.primary : palette.textSecondary,
         side: BorderSide(
           color: isActive
-              ? AppColors.primary.withValues(alpha: 0.25)
-              : AppColors.border,
+              ? palette.primary.withValues(alpha: 0.25)
+              : palette.border,
         ),
         minimumSize: const Size(44, 44),
       ),

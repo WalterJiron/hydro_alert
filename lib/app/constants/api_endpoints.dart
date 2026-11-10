@@ -18,10 +18,17 @@ class ApiEndpoints {
   static const String rainViewerBaseUrl = 'https://api.rainviewer.com';
   static const String rainViewerWeatherMapsPath = 'public/weather-maps.json';
 
-  // HydroAlert backend (NestJS)
+  // HydroAlert backend (FastAPI)
   // Paths are relative because the base URL already contains `/api/v1`.
   static const String reportsPath = 'reports';
   static const String activeReportsPath = 'reports/active';
+  static const String authRegisterPath = 'auth/register';
+  static const String authLoginPath = 'auth/login';
+  static const String seismicEventsPath = 'seismic-events';
+
+  // Realtime reports and emergency notifications.
+  static const String realtimeWebSocketPath = 'ws';
+  static const String realtimeChannels = 'reports,notifications';
 
   // Map defaults
   static const double nicaraguaCenterLatitude = 12.8654;
@@ -39,5 +46,6 @@ class ApiEndpoints {
 
   static const String googleMapsSite = 'https://www.google.com/maps';
   static const String usgsEarthquakeSite = 'https://earthquake.usgs.gov';
+  static const String ineterSite = 'https://www.ineter.gob.ni/';
   static const String rainViewerSite = 'https://www.rainviewer.com';
 }

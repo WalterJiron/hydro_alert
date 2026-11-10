@@ -46,8 +46,8 @@ class HomeDashboardView extends ConsumerWidget {
               onPressed: () => showHomeProfileSheet(context, ref),
               tooltip: 'Perfil',
               style: IconButton.styleFrom(
-                backgroundColor: AppColors.primarySoft,
-                foregroundColor: AppColors.primary,
+                backgroundColor: context.palette.primarySoft,
+                foregroundColor: context.palette.primary,
               ),
               icon: const Icon(LucideIcons.userRound, size: 20),
             ),
@@ -104,7 +104,7 @@ class HomeDashboardView extends ConsumerWidget {
               order: 4,
               child: SectionHeader(
                 title: 'Últimos sismos',
-                subtitle: 'Eventos de USGS en los últimos 30 días',
+                subtitle: 'Actividad sísmica reciente en Nicaragua',
                 actionLabel: 'Ver todos',
                 onAction: () => context.go('/alertas'),
               ),

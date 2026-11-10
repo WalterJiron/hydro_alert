@@ -3,146 +3,175 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_typography.dart';
 
-/// Material 3 theme for HydroAlert.
+/// Material 3 themes for HydroAlert.
+///
+/// Both themes share the same structure and brand accents; only the palette
+/// changes. The app follows the device setting through `ThemeMode.system`.
 class AppTheme {
   const AppTheme._();
 
-  static ThemeData get light {
+  static ThemeData get light => _build(AppPalette.light, Brightness.light);
+
+  static ThemeData get dark => _build(AppPalette.dark, Brightness.dark);
+
+  static ThemeData _build(AppPalette palette, Brightness brightness) {
     final baseScheme = ColorScheme.fromSeed(
       seedColor: AppColors.primary,
-      brightness: Brightness.light,
+      brightness: brightness,
     );
 
+    final isDark = brightness == Brightness.dark;
     final colorScheme = baseScheme.copyWith(
-      primary: AppColors.primary,
-      onPrimary: Colors.white,
-      primaryContainer: AppColors.primarySoft,
-      onPrimaryContainer: AppColors.primaryDark,
+      primary: palette.primary,
+      onPrimary: isDark ? palette.background : Colors.white,
+      primaryContainer: palette.primarySoft,
+      onPrimaryContainer: palette.primaryStrong,
       secondary: AppColors.warning,
       onSecondary: Colors.white,
-      secondaryContainer: AppColors.warningSoft,
-      onSecondaryContainer: AppColors.warningDark,
+      secondaryContainer: palette.warningSoft,
+      onSecondaryContainer: palette.warningStrong,
       error: AppColors.danger,
       onError: Colors.white,
-      errorContainer: AppColors.dangerSoft,
-      onErrorContainer: AppColors.dangerDark,
-      surface: AppColors.surface,
-      onSurface: AppColors.textPrimary,
-      onSurfaceVariant: AppColors.textSecondary,
-      outline: AppColors.border,
-      outlineVariant: AppColors.border,
+      errorContainer: palette.dangerSoft,
+      onErrorContainer: palette.dangerStrong,
+      surface: palette.surface,
+      onSurface: palette.textPrimary,
+      onSurfaceVariant: palette.textSecondary,
+      surfaceContainerHighest: palette.surfaceMuted,
+      outline: palette.border,
+      outlineVariant: palette.border,
+      inverseSurface: palette.textPrimary,
+      onInverseSurface: palette.background,
+      inversePrimary: palette.primarySoft,
     );
+
+    final textTheme = AppTypography.textThemeFor(palette);
 
     return ThemeData(
       useMaterial3: true,
+      brightness: brightness,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: AppColors.background,
-      textTheme: AppTypography.textTheme,
+      extensions: <ThemeExtension<dynamic>>[palette],
+      scaffoldBackgroundColor: palette.background,
+      canvasColor: palette.background,
+      cardColor: palette.surface,
+      textTheme: textTheme,
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.background,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: palette.background,
+        foregroundColor: palette.textPrimary,
         elevation: 0,
         scrolledUnderElevation: 0.5,
         centerTitle: false,
         surfaceTintColor: Colors.transparent,
-        titleTextStyle: AppTypography.titleLarge,
+        titleTextStyle: AppTypography.titleLarge.copyWith(
+          color: palette.textPrimary,
+        ),
+        iconTheme: IconThemeData(color: palette.textSecondary, size: 22),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: palette.surface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
         ),
-        hintStyle: AppTypography.bodyMedium.copyWith(
-          color: AppColors.textMuted,
+        hintStyle: AppTypography.bodyMedium.copyWith(color: palette.textMuted),
+        labelStyle: AppTypography.labelMedium.copyWith(
+          color: palette.textSecondary,
         ),
-        labelStyle: AppTypography.labelMedium,
-        border: _inputBorder(AppColors.border),
-        enabledBorder: _inputBorder(AppColors.border),
-        focusedBorder: _inputBorder(AppColors.primary, width: 1.6),
+        border: _inputBorder(palette.border),
+        enabledBorder: _inputBorder(palette.border),
+        focusedBorder: _inputBorder(palette.primary, width: 1.6),
         errorBorder: _inputBorder(AppColors.danger),
         focusedErrorBorder: _inputBorder(AppColors.danger, width: 1.6),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          backgroundColor: palette.primaryFill,
+          foregroundColor: palette.onPrimaryFill,
           minimumSize: const Size(48, 48),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
-          textStyle: AppTypography.labelLarge.copyWith(color: Colors.white),
+          textStyle: AppTypography.labelLarge.copyWith(
+            color: palette.onPrimaryFill,
+          ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: palette.primary,
           minimumSize: const Size(48, 48),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-          side: const BorderSide(color: AppColors.border),
+          side: BorderSide(color: palette.border),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
-          textStyle: AppTypography.labelLarge.copyWith(
-            color: AppColors.primary,
-          ),
+          textStyle: AppTypography.labelLarge.copyWith(color: palette.primary),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: palette.primary,
           minimumSize: const Size(48, 48),
-          textStyle: AppTypography.labelLarge.copyWith(
-            color: AppColors.primary,
-          ),
+          textStyle: AppTypography.labelLarge.copyWith(color: palette.primary),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: AppColors.surface,
-        indicatorColor: AppColors.primarySoft,
+        backgroundColor: palette.surface,
+        indicatorColor: palette.primarySoft,
         height: 72,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((states) {
           final selected = states.contains(WidgetState.selected);
           return IconThemeData(
             size: 22,
-            color: selected ? AppColors.primary : AppColors.textMuted,
+            color: selected ? palette.primary : palette.textMuted,
           );
         }),
         labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
           final selected = states.contains(WidgetState.selected);
           return AppTypography.labelSmall.copyWith(
-            color: selected ? AppColors.primary : AppColors.textMuted,
+            color: selected ? palette.primary : palette.textMuted,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
           );
         }),
       ),
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: AppColors.surface,
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: palette.surface,
         surfaceTintColor: Colors.transparent,
         showDragHandle: true,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
       ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: palette.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.textPrimary,
+        backgroundColor: colorScheme.inverseSurface,
         contentTextStyle: AppTypography.bodyMedium.copyWith(
-          color: Colors.white,
+          color: colorScheme.onInverseSurface,
         ),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      dividerTheme: const DividerThemeData(
-        color: AppColors.border,
+      dividerTheme: DividerThemeData(
+        color: palette.border,
         thickness: 1,
         space: 1,
       ),
-      iconTheme: const IconThemeData(color: AppColors.textSecondary, size: 22),
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: AppColors.primary,
+      iconTheme: IconThemeData(color: palette.textSecondary, size: 22),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: palette.primary,
+      ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: palette.primary,
+        selectionColor: palette.primarySoft,
+        selectionHandleColor: palette.primary,
       ),
       splashFactory: InkSparkle.splashFactory,
     );

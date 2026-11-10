@@ -112,16 +112,6 @@ class EmergencyCenterView extends StatelessWidget {
               onCreateReport: () => context.push('/reportes/nuevo'),
             ),
           ),
-          const SizedBox(height: 20),
-          const AppAnimatedEntrance(
-            order: 8,
-            child: InfoBanner(
-              icon: LucideIcons.info,
-              message:
-                  'HydroAlert es una herramienta informativa. No reemplaza a las '
-                  'autoridades ni a los servicios de emergencia.',
-            ),
-          ),
         ],
       ),
     );

@@ -149,7 +149,7 @@ class _SheetRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: AppColors.textMuted),
+          Icon(icon, size: 16, color: context.palette.textMuted),
           const SizedBox(width: 8),
           SizedBox(
             width: 84,

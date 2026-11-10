@@ -12,6 +12,8 @@ class SafetyStepsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return AppCard(
       child: Column(
         children: [
@@ -24,14 +26,14 @@ class SafetyStepsCard extends StatelessWidget {
                   width: 24,
                   height: 24,
                   alignment: Alignment.center,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primarySoft,
+                  decoration: BoxDecoration(
+                    color: palette.primarySoft,
                     shape: BoxShape.circle,
                   ),
                   child: Text(
                     '${index + 1}',
                     style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.primary,
+                      color: palette.primary,
                       fontWeight: FontWeight.w800,
                     ),
                   ),

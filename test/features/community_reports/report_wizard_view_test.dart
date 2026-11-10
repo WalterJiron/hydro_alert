@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hydro_alert/app/theme/app_theme.dart';
+import 'package:hydro_alert/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:hydro_alert/features/community_reports/presentation/views/report_wizard_view.dart';
+
+import '../../support/in_memory_auth_store.dart';
 
 void main() {
   testWidgets('wizard moves from the category step to the evidence step', (
@@ -14,6 +17,9 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
+        overrides: [
+          authLocalStoreProvider.overrideWithValue(InMemoryAuthStore()),
+        ],
         child: MaterialApp(
           theme: AppTheme.light,
           home: const ReportWizardView(),

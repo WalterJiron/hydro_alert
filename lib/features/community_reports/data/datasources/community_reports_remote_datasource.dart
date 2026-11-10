@@ -4,17 +4,16 @@ import '../../../../app/config/app_config.dart';
 import '../../../../app/constants/api_endpoints.dart';
 import '../../../../core/errors/app_failure.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../domain/entities/report_draft.dart';
 import '../models/community_report_model.dart';
 
-/// HTTP access to the HydroAlert NestJS backend.
-///
-/// The reports payload is provisional because the backend OpenAPI contract
-/// has not been provided yet. Keep changes isolated here when it is available.
+/// HTTP access to the HydroAlert backend.
 class CommunityReportsRemoteDataSource {
-  const CommunityReportsRemoteDataSource(this._dio);
+  const CommunityReportsRemoteDataSource(this._dio, this._authRepository);
 
   final Dio _dio;
+  final AuthRepository _authRepository;
 
   Future<List<CommunityReportModel>> fetchActiveReports() async {
     _requireBackend();
@@ -51,6 +50,13 @@ class CommunityReportsRemoteDataSource {
       );
     }
 
+    final token = await _authRepository.currentToken();
+    if (token == null || token.trim().isEmpty) {
+      throw const UnauthorizedFailure(
+        message: 'Inicia sesión para publicar un reporte.',
+      );
+    }
+
     final formData = FormData.fromMap(<String, dynamic>{
       'category': category.wireValue,
       'description': draft.description.trim(),
@@ -64,7 +70,13 @@ class CommunityReportsRemoteDataSource {
     });
 
     await ApiClient.run(
-      () => _dio.post<Object?>(ApiEndpoints.reportsPath, data: formData),
+      () => _dio.post<Object?>(
+        ApiEndpoints.reportsPath,
+        data: formData,
+        options: Options(
+          headers: <String, dynamic>{'Authorization': 'Bearer ${token.trim()}'},
+        ),
+      ),
     );
   }
 

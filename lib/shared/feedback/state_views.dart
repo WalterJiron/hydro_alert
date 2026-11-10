@@ -71,8 +71,8 @@ class ErrorState extends StatelessWidget {
           children: [
             _IconCircle(
               icon: Icons.cloud_off_rounded,
-              color: AppColors.danger,
-              background: AppColors.dangerSoft,
+              color: context.palette.dangerStrong,
+              background: context.palette.dangerSoft,
             ),
             const SizedBox(height: 18),
             Text(
@@ -85,7 +85,7 @@ class ErrorState extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textMuted,
+                color: context.palette.textMuted,
               ),
             ),
             if (onRetry != null) ...[
@@ -130,8 +130,8 @@ class EmptyState extends StatelessWidget {
           children: [
             _IconCircle(
               icon: icon,
-              color: AppColors.primary,
-              background: AppColors.primarySoft,
+              color: context.palette.primary,
+              background: context.palette.primarySoft,
             ),
             const SizedBox(height: 18),
             Text(
@@ -144,7 +144,7 @@ class EmptyState extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textMuted,
+                color: context.palette.textMuted,
               ),
             ),
             if (actionLabel != null && onAction != null) ...[

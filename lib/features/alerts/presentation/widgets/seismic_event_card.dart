@@ -76,10 +76,10 @@ class SeismicEventCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           LucideIcons.clock,
                           size: 13,
-                          color: AppColors.textMuted,
+                          color: context.palette.textMuted,
                         ),
                         const SizedBox(width: 4),
                         Flexible(
@@ -114,7 +114,7 @@ class SeismicEventCard extends StatelessWidget {
                 _Detail(icon: LucideIcons.layers, label: event.depthLabel),
                 _Detail(
                   icon: LucideIcons.activity,
-                  label: reviewStatusLabel(event.reviewStatus),
+                  label: reviewStatusLabel(event),
                 ),
                 if (event.tsunami)
                   const _Detail(
@@ -122,7 +122,10 @@ class SeismicEventCard extends StatelessWidget {
                     label: 'Aviso de tsunami',
                     isWarning: true,
                   ),
-                const _Detail(icon: LucideIcons.radio, label: 'Fuente: USGS'),
+                _Detail(
+                  icon: LucideIcons.radio,
+                  label: seismicSourceLabel(event),
+                ),
               ],
             ),
           ],
@@ -145,7 +148,7 @@ class _Detail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isWarning ? AppColors.danger : AppColors.textMuted;
+    final color = isWarning ? AppColors.danger : context.palette.textMuted;
 
     return Row(
       mainAxisSize: MainAxisSize.min,

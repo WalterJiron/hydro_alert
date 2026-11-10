@@ -27,7 +27,7 @@ class AppCard extends StatelessWidget {
     return AppPressScale(
       enabled: onTap != null,
       child: Material(
-        color: backgroundColor ?? AppColors.surface,
+        color: backgroundColor ?? context.palette.surface,
         borderRadius: radius,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -39,7 +39,7 @@ class AppCard extends StatelessWidget {
             padding: padding,
             decoration: BoxDecoration(
               borderRadius: radius,
-              border: Border.all(color: borderColor ?? AppColors.border),
+              border: Border.all(color: borderColor ?? context.palette.border),
             ),
             child: child,
           ),

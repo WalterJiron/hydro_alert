@@ -28,14 +28,14 @@ class ReportSuccessView extends StatelessWidget {
             Container(
               width: 84,
               height: 84,
-              decoration: const BoxDecoration(
-                color: AppColors.successSoft,
+              decoration: BoxDecoration(
+                color: context.palette.successSoft,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 LucideIcons.checkCircle2,
                 size: 42,
-                color: AppColors.success,
+                color: context.palette.successStrong,
               ),
             ),
             const SizedBox(height: 20),

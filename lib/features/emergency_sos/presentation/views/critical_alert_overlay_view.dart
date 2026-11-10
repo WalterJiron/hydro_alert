@@ -22,9 +22,10 @@ class CriticalAlertOverlayView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSeismic = event.isSeismic;
+    final palette = context.palette;
 
     return Material(
-      color: AppColors.overlay,
+      color: palette.overlay,
       child: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -37,7 +38,7 @@ class CriticalAlertOverlayView extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: palette.surface,
                     borderRadius: BorderRadius.circular(28),
                     border: Border.all(
                       color: AppColors.danger.withValues(alpha: 0.25),
@@ -56,14 +57,14 @@ class CriticalAlertOverlayView extends StatelessWidget {
                       Container(
                         width: 76,
                         height: 76,
-                        decoration: const BoxDecoration(
-                          color: AppColors.dangerSoft,
+                        decoration: BoxDecoration(
+                          color: palette.dangerSoft,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           LucideIcons.siren,
                           size: 38,
-                          color: AppColors.danger,
+                          color: palette.dangerStrong,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -90,7 +91,7 @@ class CriticalAlertOverlayView extends StatelessWidget {
                         runSpacing: 8,
                         children: [
                           AlertBadge(
-                            label: isSeismic ? 'USGS' : 'Notificación',
+                            label: isSeismic ? 'INETER' : 'Notificación',
                             tone: isSeismic
                                 ? AppBadgeTone.info
                                 : AppBadgeTone.warning,
@@ -113,10 +114,10 @@ class CriticalAlertOverlayView extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
+                            Icon(
                               LucideIcons.mapPin,
                               size: 14,
-                              color: AppColors.textMuted,
+                              color: palette.textMuted,
                             ),
                             const SizedBox(width: 4),
                             Flexible(
@@ -133,16 +134,16 @@ class CriticalAlertOverlayView extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppColors.warningSoft,
+                          color: palette.warningSoft,
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: Text(
                           isSeismic
-                              ? 'Este evento proviene de USGS. No es una alerta oficial '
+                              ? 'Este evento proviene de INETER. No es una alerta oficial '
                                     'de evacuación. Sigue las indicaciones de las autoridades.'
                               : 'Revisa la información y sigue las indicaciones de las autoridades.',
                           style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.warningDark,
+                            color: palette.warningStrong,
                           ),
                           textAlign: TextAlign.center,
                         ),

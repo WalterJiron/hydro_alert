@@ -25,10 +25,10 @@ class WelcomeFeature extends StatelessWidget {
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: AppColors.primarySoft,
+            color: context.palette.primarySoft,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(icon, size: 21, color: AppColors.primary),
+          child: Icon(icon, size: 21, color: context.palette.primary),
         ),
         const SizedBox(width: 12),
         Expanded(

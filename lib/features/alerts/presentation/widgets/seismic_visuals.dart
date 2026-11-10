@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_colors.dart';
+import '../../domain/entities/seismic_event.dart';
 
 Color seismicColorFor(double magnitude) {
   if (magnitude >= 6.0) {
@@ -28,11 +29,24 @@ String seismicLevelLabel(double magnitude) {
   return 'Leve';
 }
 
-String reviewStatusLabel(String? status) {
-  return switch (status?.toLowerCase()) {
+String reviewStatusLabel(SeismicEvent event) {
+  final status = event.reviewStatus?.trim().toLowerCase();
+  if (event.source.toUpperCase() == 'INETER') {
+    return switch (status) {
+      'c' => 'Confirmado por INETER',
+      'a' => 'Detección automática',
+      _ => 'Reportado por INETER',
+    };
+  }
+
+  return switch (status) {
     'reviewed' => 'Revisado por USGS',
     'automatic' => 'Detección automática',
     'deleted' => 'Evento retirado',
     _ => 'Estado no disponible',
   };
+}
+
+String seismicSourceLabel(SeismicEvent event) {
+  return 'Fuente: ${event.source}';
 }

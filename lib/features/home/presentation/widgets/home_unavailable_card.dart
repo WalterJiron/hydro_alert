@@ -33,10 +33,10 @@ class HomeUnavailableCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceMuted,
+                  color: context.palette.surfaceMuted,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, size: 20, color: AppColors.textMuted),
+                child: Icon(icon, size: 20, color: context.palette.textMuted),
               ),
               const SizedBox(width: 10),
               Expanded(child: Text(title, style: AppTypography.titleSmall)),

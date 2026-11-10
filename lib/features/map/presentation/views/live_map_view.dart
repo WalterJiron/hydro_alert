@@ -143,7 +143,10 @@ class _LiveMapViewState extends ConsumerState<LiveMapView> {
             myLocationButtonEnabled: false,
             // The map is shifted with padding so the Google logo and the
             // camera centre stay clear of the floating controls.
-            padding: EdgeInsets.only(top: 60, bottom: layerBarBottomPadding + 8),
+            padding: EdgeInsets.only(
+              top: 60,
+              bottom: layerBarBottomPadding + 8,
+            ),
           ),
           SafeArea(
             minimum: EdgeInsets.fromLTRB(14, 8, 14, layerBarBottomPadding),
@@ -157,6 +160,9 @@ class _LiveMapViewState extends ConsumerState<LiveMapView> {
                     alertsLoading: alerts.isLoading,
                     alertsAvailable: alerts.hasValue,
                     alertsCount: alerts.value?.length,
+                    sourceLabel: alerts.value?.isNotEmpty == true
+                        ? alerts.value!.first.source
+                        : null,
                     onOpenLegend: _openLegend,
                   ),
                 ),
@@ -184,10 +190,14 @@ class _LiveMapViewState extends ConsumerState<LiveMapView> {
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(LucideIcons.radar, size: 13, color: Colors.white),
+                          Icon(
+                            LucideIcons.radar,
+                            size: 13,
+                            color: Colors.white,
+                          ),
                           SizedBox(width: 6),
                           Text(
-                            'Radar de lluvia activo (RainViewer)',
+                            'Radar de lluvia activo',
                             style: TextStyle(
                               fontSize: 10.5,
                               color: Colors.white,

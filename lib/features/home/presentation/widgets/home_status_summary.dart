@@ -25,6 +25,7 @@ class HomeStatusSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final seismicCount = alerts?.length ?? 0;
+    final palette = context.palette;
 
     return AppCard(
       child: Column(
@@ -32,16 +33,14 @@ class HomeStatusSummary extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(
-                LucideIcons.activity,
-                size: 18,
-                color: AppColors.primary,
-              ),
+              Icon(LucideIcons.activity, size: 18, color: palette.primary),
               const SizedBox(width: 8),
               Text('Resumen de hoy', style: AppTypography.titleSmall),
               const Spacer(),
               StatusIndicator(
-                label: alerts == null ? 'Actualizando' : 'USGS',
+                label: alerts == null
+                    ? 'Actualizando'
+                    : (alerts!.isEmpty ? 'INETER' : alerts!.first.source),
                 color: AppColors.info,
                 isActive: alerts != null,
               ),
@@ -58,7 +57,7 @@ class HomeStatusSummary extends StatelessWidget {
                   color: AppColors.info,
                 ),
               ),
-              Container(width: 1, height: 46, color: AppColors.border),
+              Container(width: 1, height: 46, color: palette.border),
               Expanded(
                 child: _Stat(
                   value: reportCount == null ? '—' : '$reportCount',
@@ -67,7 +66,7 @@ class HomeStatusSummary extends StatelessWidget {
                   color: AppColors.warning,
                 ),
               ),
-              Container(width: 1, height: 46, color: AppColors.border),
+              Container(width: 1, height: 46, color: palette.border),
               Expanded(
                 child: _Stat(
                   value: weather == null
@@ -114,7 +113,7 @@ class _Stat extends StatelessWidget {
         Text(
           label,
           style: AppTypography.labelMedium.copyWith(
-            color: AppColors.textPrimary,
+            color: context.palette.textPrimary,
             fontWeight: FontWeight.w700,
           ),
         ),

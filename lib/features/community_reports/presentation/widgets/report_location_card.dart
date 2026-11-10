@@ -22,6 +22,8 @@ class ReportLocationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -43,16 +45,16 @@ class ReportLocationCard extends StatelessWidget {
                     height: 40,
                     decoration: BoxDecoration(
                       color: draft.hasLocation
-                          ? AppColors.successSoft
-                          : AppColors.surfaceMuted,
+                          ? palette.successSoft
+                          : palette.surfaceMuted,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       LucideIcons.mapPin,
                       size: 20,
                       color: draft.hasLocation
-                          ? AppColors.success
-                          : AppColors.textMuted,
+                          ? palette.successStrong
+                          : palette.textMuted,
                     ),
                   ),
                   const SizedBox(width: 10),

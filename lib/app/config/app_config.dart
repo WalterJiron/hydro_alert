@@ -1,3 +1,7 @@
+import 'package:flutter/foundation.dart';
+
+import '../constants/api_endpoints.dart';
+
 /// Application configuration loaded at compile time.
 ///
 /// Secrets are never committed to the repository. Provide them with
@@ -9,10 +13,31 @@ class AppConfig {
   static const String appTagline = 'Información que protege';
   static const String countryName = 'Nicaragua';
 
-  static const String apiBaseUrl = String.fromEnvironment(
+  static const String _apiBaseUrlOverride = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: '',
   );
+
+  /// Local backend used during development when `API_BASE_URL` is omitted.
+  ///
+  /// Android emulators reach the host machine through `10.0.2.2`; iOS
+  /// simulators, desktop and web use `localhost`.
+  static String get defaultApiBaseUrl {
+    if (kIsWeb) {
+      return 'http://localhost:8000/api/v1';
+    }
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:8000/api/v1';
+    }
+    return 'http://localhost:8000/api/v1';
+  }
+
+  /// Backend base URL, overridable with
+  /// `--dart-define=API_BASE_URL=https://host/api/v1`.
+  static String get apiBaseUrl {
+    final override = _apiBaseUrlOverride.trim();
+    return override.isEmpty ? defaultApiBaseUrl : override;
+  }
 
   /// Primary weather provider. Keep it out of the repository and provide it
   /// with `--dart-define=WEATHERAPI_KEY=...`.
@@ -53,11 +78,16 @@ class AppConfig {
       ) ??
       15;
 
+  /// USGS fallback limits. INETER is the primary seismic source.
   static const double usgsMinMagnitude = 2.5;
   static const int usgsLimit = 50;
   static const int usgsLookbackDays = 30;
 
-  static bool get hasBackend => apiBaseUrl.trim().isNotEmpty;
+  /// INETER history requested from the HydroAlert backend.
+  static const int ineterPageSize = 100;
+  static const int ineterLookbackDays = 30;
+
+  static bool get hasBackend => normalizedApiBaseUrl.isNotEmpty;
 
   static bool get hasWeatherApi => weatherApiKey.trim().isNotEmpty;
 
@@ -66,11 +96,74 @@ class AppConfig {
   static bool get hasWeather => hasWeatherApi || hasOpenWeather;
 
   /// Backend base URL ending in `/`, so Dio joins relative paths correctly.
+  ///
+  /// If the configured value only contains the host (for example
+  /// `http://localhost:8000`), the canonical `/api/v1` prefix is appended.
   static String get normalizedApiBaseUrl {
-    final value = apiBaseUrl.trim();
+    var value = apiBaseUrl.trim();
     if (value.isEmpty) {
       return '';
     }
-    return value.endsWith('/') ? value : '$value/';
+
+    value = value.replaceAll(RegExp(r'/+$'), '');
+    final uri = Uri.tryParse(value);
+    if (uri != null && (uri.path.isEmpty || uri.path == '/')) {
+      value = '$value/api/v1';
+    }
+
+    return '$value/';
+  }
+
+  /// Scheme and authority of the backend, used to resolve root-relative media
+  /// paths such as `/api/v1/reports/photos/{id}`.
+  static String get apiOrigin {
+    final uri = Uri.tryParse(normalizedApiBaseUrl);
+    if (uri == null || !uri.hasScheme || uri.authority.isEmpty) {
+      return '';
+    }
+    return '${uri.scheme}://${uri.authority}';
+  }
+
+  /// Realtime reports/notifications socket (`/api/v1/ws`).
+  static Uri? get realtimeWebSocketUri {
+    final base = Uri.tryParse(normalizedApiBaseUrl);
+    if (base == null || !base.hasScheme || base.authority.isEmpty) {
+      return null;
+    }
+
+    final path = base.path.replaceAll(RegExp(r'/+$'), '');
+    return base.replace(
+      scheme: base.scheme == 'https' ? 'wss' : 'ws',
+      path: '$path/${ApiEndpoints.realtimeWebSocketPath}',
+    );
+  }
+
+  /// Resolves absolute URLs and root-relative media paths returned by the
+  /// backend. Relative URLs are interpreted against the API origin, never
+  /// blindly against the `/api/v1` base path.
+  static String? resolveMediaUrl(String? raw) {
+    final value = raw?.trim();
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+
+    final uri = Uri.tryParse(value);
+    if (uri != null && uri.hasScheme) {
+      return value;
+    }
+
+    final origin = apiOrigin;
+    if (origin.isEmpty) {
+      return value;
+    }
+
+    if (value.startsWith('//')) {
+      final scheme = Uri.parse(origin).scheme;
+      return '$scheme:$value';
+    }
+    if (value.startsWith('/')) {
+      return '$origin$value';
+    }
+    return '$origin/$value';
   }
 }

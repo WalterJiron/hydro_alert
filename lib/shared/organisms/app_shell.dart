@@ -35,7 +35,8 @@ const double _kNotchSpread = 54.0;
 /// inactive icon center = (protrusion + barHeight / 2) = 7 + 27 = 34.
 /// circle center = circleRadius = 21.
 /// lift = 34 - 21 = 13.
-const double _kIconLift = _kCircleProtrusion + (_kBarHeight / 2) - _kCircleRadius; // 13.0
+const double _kIconLift =
+    _kCircleProtrusion + (_kBarHeight / 2) - _kCircleRadius; // 13.0
 
 // ---------------------------------------------------------------------------
 // Destinations – must match branch order in app_router.dart
@@ -179,13 +180,14 @@ class _NavBarContent extends StatelessWidget {
     final slotW = width / itemCount;
     final fromX = (previousIndex + 0.5) * slotW;
     final toX = (selectedIndex + 0.5) * slotW;
+    final palette = context.palette;
 
     final cx = ui.lerpDouble(fromX, toX, Curves.easeInOut.transform(progress))!;
 
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        // ── Layer 1: white bar surface with deeply pronounced wave notch ──
+        // ── Layer 1: bar surface with deeply pronounced wave notch ───────
         Positioned(
           left: 0,
           right: 0,
@@ -195,6 +197,8 @@ class _NavBarContent extends StatelessWidget {
             painter: _WaveBarPainter(
               itemCount: itemCount,
               cx: cx,
+              surfaceColor: palette.surface,
+              borderColor: palette.border,
             ),
           ),
         ),
@@ -224,7 +228,8 @@ class _NavBarContent extends StatelessWidget {
               (i) => _NavItem(
                 destination: _destinations[i],
                 isSelected: i == selectedIndex,
-                wasPrevious: i == previousIndex && selectedIndex != previousIndex,
+                wasPrevious:
+                    i == previousIndex && selectedIndex != previousIndex,
                 progress: progress,
                 onTap: () => onTap(i),
               ),
@@ -247,11 +252,11 @@ class _FloatingBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        color: context.palette.primaryFill,
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withAlpha(90),
+            color: context.palette.primaryFill.withAlpha(90),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -270,10 +275,14 @@ class _WaveBarPainter extends CustomPainter {
   const _WaveBarPainter({
     required this.itemCount,
     required this.cx,
+    required this.surfaceColor,
+    required this.borderColor,
   });
 
   final int itemCount;
   final double cx;
+  final Color surfaceColor;
+  final Color borderColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -287,14 +296,14 @@ class _WaveBarPainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
     );
 
-    // Solid white fill.
-    canvas.drawPath(path, Paint()..color = Colors.white);
+    // Solid bar surface.
+    canvas.drawPath(path, Paint()..color = surfaceColor);
 
     // Subtle hairline border along the top wave silhouette.
     canvas.drawPath(
       path,
       Paint()
-        ..color = Colors.black.withValues(alpha: 0.05)
+        ..color = borderColor
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1,
     );
@@ -308,9 +317,9 @@ class _WaveBarPainter extends CustomPainter {
       final dist = (x - cx).abs();
       final y = dist < _kNotchSpread
           ? _kNotchDepth *
-              math
-                  .pow(math.cos(dist / _kNotchSpread * math.pi / 2), 2)
-                  .toDouble()
+                math
+                    .pow(math.cos(dist / _kNotchSpread * math.pi / 2), 2)
+                    .toDouble()
           : 0.0;
       path.lineTo(x, y);
     }
@@ -322,7 +331,11 @@ class _WaveBarPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _WaveBarPainter old) => old.cx != cx;
+  bool shouldRepaint(covariant _WaveBarPainter old) {
+    return old.cx != cx ||
+        old.surfaceColor != surfaceColor ||
+        old.borderColor != borderColor;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -347,12 +360,13 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isTransitioning = wasPrevious && progress < 1.0;
+    final palette = context.palette;
 
     final iconColor = isSelected
         ? Colors.white
         : (isTransitioning
-            ? Color.lerp(Colors.white, AppColors.textSecondary, progress)!
-            : AppColors.textSecondary);
+              ? Color.lerp(Colors.white, palette.textSecondary, progress)!
+              : palette.textSecondary);
 
     final double verticalShift;
     if (isSelected) {
@@ -396,9 +410,9 @@ class _NavItem extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   destination.label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10,
-                    color: AppColors.textMuted,
+                    color: palette.textMuted,
                     fontWeight: FontWeight.w500,
                     height: 1.1,
                   ),

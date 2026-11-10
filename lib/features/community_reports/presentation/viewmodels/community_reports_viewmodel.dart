@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../app/config/app_config.dart';
+import '../../../../core/services/realtime_service.dart';
 import '../../data/repositories/community_reports_repository_impl.dart';
 import '../../domain/entities/community_report.dart';
 
@@ -11,6 +12,8 @@ part 'community_reports_viewmodel.g.dart';
 @Riverpod(keepAlive: true)
 class CommunityReportsViewModel extends _$CommunityReportsViewModel {
   Timer? _timer;
+  Timer? _realtimeRefreshTimer;
+  StreamSubscription<RealtimeReportEvent>? _realtimeSubscription;
   bool _disposed = false;
 
   @override
@@ -19,11 +22,19 @@ class CommunityReportsViewModel extends _$CommunityReportsViewModel {
       _timer = Timer.periodic(const Duration(minutes: 5), (_) {
         unawaited(_refreshSilently());
       });
+
+      final realtime = ref.watch(realtimeServiceProvider);
+      _realtimeSubscription = realtime.reportEvents.listen((_) {
+        _scheduleRealtimeRefresh();
+      });
+      realtime.start();
     }
 
     ref.onDispose(() {
       _disposed = true;
       _timer?.cancel();
+      _realtimeRefreshTimer?.cancel();
+      unawaited(_realtimeSubscription?.cancel());
     });
 
     return ref.watch(communityReportsRepositoryProvider).fetchActiveReports();
@@ -33,6 +44,17 @@ class CommunityReportsViewModel extends _$CommunityReportsViewModel {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
       () => ref.read(communityReportsRepositoryProvider).fetchActiveReports(),
+    );
+  }
+
+  void _scheduleRealtimeRefresh() {
+    if (_disposed) {
+      return;
+    }
+    _realtimeRefreshTimer?.cancel();
+    _realtimeRefreshTimer = Timer(
+      const Duration(milliseconds: 500),
+      () => unawaited(_refreshSilently()),
     );
   }
 

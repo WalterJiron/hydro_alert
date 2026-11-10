@@ -98,11 +98,11 @@ class CommunityReportCard extends StatelessWidget {
                         return Container(
                           width: 64,
                           height: 64,
-                          color: AppColors.surfaceMuted,
-                          child: const Icon(
+                          color: context.palette.surfaceMuted,
+                          child: Icon(
                             LucideIcons.image,
                             size: 20,
-                            color: AppColors.textMuted,
+                            color: context.palette.textMuted,
                           ),
                         );
                       },
@@ -114,18 +114,18 @@ class CommunityReportCard extends StatelessWidget {
             const SizedBox(height: 10),
             Row(
               children: [
-                const Icon(
+                Icon(
                   LucideIcons.mapPin,
                   size: 13,
-                  color: AppColors.textMuted,
+                  color: context.palette.textMuted,
                 ),
                 const SizedBox(width: 4),
                 Text(report.coordinatesLabel, style: AppTypography.labelSmall),
                 const Spacer(),
-                const Icon(
+                Icon(
                   LucideIcons.users,
                   size: 13,
-                  color: AppColors.textMuted,
+                  color: context.palette.textMuted,
                 ),
                 const SizedBox(width: 4),
                 Text('Reporte comunitario', style: AppTypography.labelSmall),
@@ -138,18 +138,6 @@ class CommunityReportCard extends StatelessWidget {
   }
 
   String? _resolvePhotoUrl(String? raw) {
-    if (raw == null || raw.trim().isEmpty) {
-      return null;
-    }
-    final value = raw.trim();
-    if (value.startsWith('http://') || value.startsWith('https://')) {
-      return value;
-    }
-    if (!AppConfig.hasBackend) {
-      return null;
-    }
-    return value.startsWith('/')
-        ? '${AppConfig.normalizedApiBaseUrl.replaceAll(RegExp(r'/$'), '')}$value'
-        : '${AppConfig.normalizedApiBaseUrl}$value';
+    return AppConfig.resolveMediaUrl(raw);
   }
 }

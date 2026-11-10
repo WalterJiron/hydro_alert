@@ -38,7 +38,7 @@ final class CommunityReportsViewModelProvider
 }
 
 String _$communityReportsViewModelHash() =>
-    r'5df80df6c2b70510f42a278cbbfd0f6e7ab1e512';
+    r'fdd96b9969bbde138e38948c1b3d9c2399a2af83';
 
 abstract class _$CommunityReportsViewModel
     extends $AsyncNotifier<List<CommunityReport>> {

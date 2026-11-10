@@ -64,7 +64,7 @@ Future<void> showSeismicEventSheet(BuildContext context, SeismicEvent event) {
               _SheetRow(
                 icon: LucideIcons.activity,
                 label: 'Estado',
-                value: reviewStatusLabel(event.reviewStatus),
+                value: reviewStatusLabel(event),
               ),
               _SheetRow(
                 icon: LucideIcons.mapPin,
@@ -88,15 +88,17 @@ Future<void> showSeismicEventSheet(BuildContext context, SeismicEvent event) {
               const SizedBox(height: 16),
               if (event.url != null)
                 CustomButton(
-                  label: 'Abrir en USGS',
+                  label: 'Abrir en ${event.source}',
                   icon: LucideIcons.externalLink,
                   expand: true,
                   onPressed: () async {
                     final launched = await openExternalUrl(event.url!);
                     if (!launched && sheetContext.mounted) {
                       ScaffoldMessenger.of(sheetContext).showSnackBar(
-                        const SnackBar(
-                          content: Text('No pudimos abrir el enlace de USGS.'),
+                        SnackBar(
+                          content: Text(
+                            'No pudimos abrir el enlace de ${event.source}.',
+                          ),
                         ),
                       );
                     }
@@ -127,7 +129,7 @@ class _SheetRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: AppColors.textMuted),
+          Icon(icon, size: 16, color: context.palette.textMuted),
           const SizedBox(width: 8),
           SizedBox(
             width: 92,

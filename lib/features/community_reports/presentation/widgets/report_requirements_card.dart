@@ -53,19 +53,21 @@ class _Requirement extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Row(
       children: [
         Icon(
           met ? LucideIcons.circleCheck : LucideIcons.circleAlert,
           size: 18,
-          color: met ? AppColors.success : AppColors.textMuted,
+          color: met ? palette.successStrong : palette.textMuted,
         ),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             label,
             style: AppTypography.bodySmall.copyWith(
-              color: met ? AppColors.textSecondary : AppColors.textMuted,
+              color: met ? palette.textSecondary : palette.textMuted,
             ),
           ),
         ),

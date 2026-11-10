@@ -1,6 +1,6 @@
 /// Categories accepted by the community report wizard.
 ///
-/// The wire values are provisional until the NestJS contract is confirmed.
+/// Wire values are shared with the FastAPI backend report contract.
 enum ReportCategory {
   flood('flood', 'Inundación'),
   damagedDrain('damaged_drain', 'Alcantarilla dañada'),

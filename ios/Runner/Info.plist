@@ -26,6 +26,13 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Allows the local FastAPI backend over http://localhost:8000
+		     during development without enabling arbitrary HTTP loads. -->
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>HydroAlert usa la cámara para adjuntar una foto a tu reporte comunitario.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
