@@ -24,6 +24,6 @@ Color reportCategoryColor(ReportCategory category) {
     ReportCategory.landslide => AppColors.brandOrange,
     ReportCategory.fire => AppColors.danger,
     ReportCategory.earthquakeDamage => AppColors.seismicStrong,
-    ReportCategory.other => AppColors.neutral,
+    ReportCategory.other => AppColors.categoryOther,
   };
 }

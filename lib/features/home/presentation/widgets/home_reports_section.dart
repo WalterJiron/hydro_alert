@@ -11,6 +11,7 @@ import '../../../../shared/molecules/app_card.dart';
 import '../../../community_reports/domain/entities/community_report.dart';
 import '../../../community_reports/presentation/viewmodels/community_reports_viewmodel.dart';
 import '../../../community_reports/presentation/widgets/community_report_card.dart';
+import '../../../community_reports/presentation/widgets/community_report_sheet.dart';
 import 'home_unavailable_card.dart';
 
 /// Latest community reports preview for the home dashboard.
@@ -70,7 +71,11 @@ class HomeReportsSection extends ConsumerWidget {
           children: [
             for (var index = 0; index < preview.length; index++) ...[
               if (index > 0) const SizedBox(height: 10),
-              CommunityReportCard(report: preview[index]),
+              CommunityReportCard(
+                report: preview[index],
+                onTap: () =>
+                    showCommunityReportSheet(context, preview[index]),
+              ),
             ],
           ],
         );

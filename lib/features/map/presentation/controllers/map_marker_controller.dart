@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:latlong2/latlong.dart' as latlong;
@@ -76,6 +78,73 @@ class MapMarkerController {
     });
   }
 
+  /// Offsets overlapping or coincident report coordinates slightly so every
+  /// report pin remains visible and interactive on the map.
+  static Map<String, LatLng> computeReportPositions(
+    List<CommunityReport> reports,
+  ) {
+    final positions = <String, LatLng>{};
+    if (reports.isEmpty) {
+      return positions;
+    }
+
+    // Cluster reports that are within ~15 meters of each other (~0.00014 degrees).
+    const double clusterThreshold = 0.00014;
+    final clusters = <List<CommunityReport>>[];
+
+    for (final report in reports) {
+      bool added = false;
+      for (final cluster in clusters) {
+        final reference = cluster.first;
+        final dLat = (report.latitude - reference.latitude).abs();
+        final dLng = (report.longitude - reference.longitude).abs();
+        if (dLat < clusterThreshold && dLng < clusterThreshold) {
+          cluster.add(report);
+          added = true;
+          break;
+        }
+      }
+      if (!added) {
+        clusters.add([report]);
+      }
+    }
+
+    for (final cluster in clusters) {
+      if (cluster.length == 1) {
+        final single = cluster.first;
+        positions[single.id] = LatLng(single.latitude, single.longitude);
+        continue;
+      }
+
+      // Compute cluster centroid
+      double sumLat = 0.0;
+      double sumLng = 0.0;
+      for (final r in cluster) {
+        sumLat += r.latitude;
+        sumLng += r.longitude;
+      }
+      final centerLat = sumLat / cluster.length;
+      final centerLng = sumLng / cluster.length;
+
+      // Disperse coincident markers evenly in a small circle (~12m radius)
+      const double radius = 0.00011;
+      final latRad = centerLat * (math.pi / 180.0);
+      final lngScale = math.cos(latRad).abs().clamp(0.2, 1.0);
+
+      for (var i = 0; i < cluster.length; i++) {
+        final angle = (2 * math.pi * i) / cluster.length;
+        final offsetLat = radius * math.cos(angle);
+        final offsetLng = (radius * math.sin(angle)) / lngScale;
+        positions[cluster[i].id] = LatLng(
+          centerLat + offsetLat,
+          centerLng + offsetLng,
+        );
+      }
+    }
+
+    return positions;
+  }
+
   /// Builds every marker that already has a cached icon.
   Set<Marker> buildMarkers({
     required List<SeismicEvent> events,
@@ -86,21 +155,26 @@ class MapMarkerController {
     required ValueChanged<SeismicEvent> onSeismicTap,
   }) {
     final markers = <Marker>{};
+    final reportPositions = computeReportPositions(reports);
 
-    for (final report in reports) {
+    for (var index = 0; index < reports.length; index++) {
+      final report = reports[index];
       final icon = _icons[MapMarkerIcons.reportKey(report, pixelRatio)];
       if (icon == null) {
         continue;
       }
+      final position = reportPositions[report.id] ??
+          LatLng(report.latitude, report.longitude);
+
       markers.add(
         Marker(
           markerId: MarkerId('report-${report.id}'),
-          position: LatLng(report.latitude, report.longitude),
+          position: position,
           icon: icon,
           anchor: const Offset(0.5, 1),
           consumeTapEvents: true,
           infoWindow: InfoWindow.noText,
-          zIndexInt: 1,
+          zIndexInt: 5 + (reports.length - index),
           onTap: () => onReportTap(report),
         ),
       );

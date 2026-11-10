@@ -25,6 +25,9 @@ class AppColors {
   static const Color seismicStrong = Color(0xFFDC2626);
   static const Color seismicMajor = Color(0xFF7F1D1D);
 
+  /// Distinctive violet for miscellaneous community reports.
+  static const Color categoryOther = Color(0xFF8B5CF6);
+
   /// Neutral gray that stays readable on map tiles and generated bitmaps.
   static const Color neutral = Color(0xFF64748B);
 

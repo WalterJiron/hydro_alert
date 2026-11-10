@@ -8,6 +8,7 @@ import '../../../../shared/molecules/app_card.dart';
 import '../../../alerts/domain/entities/seismic_event.dart';
 import '../../../alerts/presentation/viewmodels/alerts_viewmodel.dart';
 import '../../../alerts/presentation/widgets/seismic_event_card.dart';
+import '../../../alerts/presentation/widgets/seismic_event_sheet.dart';
 import 'home_unavailable_card.dart';
 
 /// Latest INETER/USGS earthquakes preview for the home dashboard.
@@ -45,7 +46,12 @@ class HomeSeismicSection extends ConsumerWidget {
           children: [
             for (var index = 0; index < preview.length; index++) ...[
               if (index > 0) const SizedBox(height: 10),
-              SeismicEventCard(event: preview[index]),
+              SeismicEventCard(
+                event: preview[index],
+                showDetails: true,
+                onTap: () =>
+                    showSeismicEventSheet(context, preview[index]),
+              ),
             ],
           ],
         );

@@ -46,6 +46,7 @@ class ApiEndpoints {
 
   static const String googleMapsSite = 'https://www.google.com/maps';
   static const String usgsEarthquakeSite = 'https://earthquake.usgs.gov';
-  static const String ineterSite = 'https://www.ineter.gob.ni/';
+  static const String ineterSite =
+      'https://www.ineter.gob.ni/articulos/areas-tecnicas/geofisica/monitoreo-de-sismos-en-tiempo-real.html';
   static const String rainViewerSite = 'https://www.rainviewer.com';
 }
