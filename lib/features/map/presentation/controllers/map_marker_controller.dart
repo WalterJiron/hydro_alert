@@ -163,7 +163,8 @@ class MapMarkerController {
       if (icon == null) {
         continue;
       }
-      final position = reportPositions[report.id] ??
+      final position =
+          reportPositions[report.id] ??
           LatLng(report.latitude, report.longitude);
 
       markers.add(

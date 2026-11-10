@@ -73,8 +73,7 @@ class HomeReportsSection extends ConsumerWidget {
               if (index > 0) const SizedBox(height: 10),
               CommunityReportCard(
                 report: preview[index],
-                onTap: () =>
-                    showCommunityReportSheet(context, preview[index]),
+                onTap: () => showCommunityReportSheet(context, preview[index]),
               ),
             ],
           ],

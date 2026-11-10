@@ -27,7 +27,7 @@
 | **Inicio** | Tablero de resumen y conciencia situacional | Saludo dinámico, clima actual de la zona, últimos 3 sismos con acceso directo a detalles, últimos reportes y acceso rápido a la guía de emergencia. |
 | **Mapa** | Visualización geoespacial interactiva | Google Maps con pines SVG/Bitmap a resolución nativa, visualización de sismos con escala por magnitud, dispersión radial automática de pines coincidentes, capa de radar satelital RainViewer y geolocalización. |
 | **Reportes** | Red colaborativa comunitaria | Feed de incidentes con fotografías (Supabase Storage), filtros por categoría y asistente multipart de dos pasos con geolocalización. Exploración 100% pública; publicación autenticada. |
-| **Alertas** | Monitoreo técnico multivariable | Sismos INETER (respaldo USGS) con ruta directa de monitoreo en tiempo real, alertas de clima WeatherAPI (respaldo OpenWeather) y cálculo de tiempos en huso horario local de Nicaragua (UTC-6). |
+| **Alertas** | Monitoreo técnico multivariable | Sismos INETER (respaldo USGS) con ruta directa de monitoreo en tiempo real, alertas de clima WeatherAPI (respaldo OpenWeather), cálculo de tiempos en huso horario local de Nicaragua (UTC-6) y **notificaciones locales automáticas** para sismos M≥5.0. |
 | **Emergencia** | Protocolos y auxilio visual | Guía de actuación ante sismos/inundaciones/incendios y modo SOS visual a pantalla completa (destello intermitente sin consumo de batería en reposo). |
 
 > [!NOTE]
@@ -279,7 +279,7 @@ flutter test
 ```
 
 > [!NOTE]
-> Estado actual: **0 incidencias** en `flutter analyze` y **63 pruebas automatizadas aprobadas al 100%** (incluyendo validación de dispersión de pines en mapa, esquemas de error del backend y mapeo INETER/USGS).
+> Estado actual: **0 incidencias** en `flutter analyze` y **63 pruebas automatizadas aprobadas al 100%** (incluyendo validación de dispersión de pines en mapa, esquemas de error del backend, mapeo INETER/USGS y notificaciones sísmicas locales).
 
 ---
 
@@ -305,4 +305,47 @@ La aplicación implementa el principio de privilegio mínimo; los permisos nunca
 - **Ubicación (`ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`):** Solicitada solo cuando se pulsa el botón de centrar en el mapa o en el paso 2 del asistente de reportes comunitarios.
 - **Cámara (`CAMERA`):** Solicitada únicamente si el usuario elige tomar una fotografía en vivo para evidenciar su reporte.
 - **Almacenamiento / Galería (`READ_MEDIA_IMAGES`):** Solicitada al adjuntar una foto existente desde la fototeca del teléfono.
-- **Notificaciones (`POST_NOTIFICATIONS`):** Para alertas críticas de sismos mayores a magnitud 5.0.
+- **Notificaciones (`POST_NOTIFICATIONS`, `VIBRATE`):** Solicitada en el primer sismo M≥5.0 detectado en la sesión. Nunca se pide al arranque.
+
+---
+
+## 9. Notificaciones Sísmicas Locales
+
+HydroAlert emite una **notificación del sistema** (canal `hydroalert_seismic`, prioridad alta) cada vez que el monitor INETER detecta un sismo nuevo de **magnitud ≥ 5.0** durante la sesión.
+
+### Comportamiento
+
+| Aspecto | Detalle |
+| :--- | :--- |
+| **Motor** | `flutter_local_notifications` v23 — sin dependencia de Firebase |
+| **Canal Android** | `hydroalert_seismic` · Importancia **Alta** · Vibración + sonido |
+| **Umbral** | Configurable via `--dart-define=SOS_MAGNITUDE_THRESHOLD=5.0` |
+| **Deduplicación** | ID estable derivado del hash del evento; no se apilan duplicados |
+| **Históricos** | Los eventos presentes al abrir la app no generan notificación |
+| **Permiso** | Solicitado en la primera sesión con sismo fuerte (Android 13+) |
+
+### Flujo de Notificación
+
+```
+AlertsViewModel._refreshSilently()   ← cada 5 min (Timer)
+        │
+        ▼
+  evento nuevo AND magnitud ≥ 5.0 AND id ∉ _notifiedIds
+        │
+        ▼
+SeismicNotificationService.showSeismicAlert()
+        │
+        ▼
+  FlutterLocalNotificationsPlugin.show()   →  Canal hydroalert_seismic
+        │
+        ▼
+  Notificación sistema  🌍 Sismo M5.3 — Managua, Nicaragua
+```
+
+### Integración con la Alerta Crítica (In-App)
+
+El overlay de emergencia en pantalla completa (`CriticalAlertHost`) y la notificación del sistema funcionan en **capas independientes**:
+
+- El overlay se dispara cuando `EmergencyViewModel.evaluateSeismicEvents()` identifica un evento reciente por encima del umbral.
+- La notificación del sistema se dispara desde `AlertsViewModel` en cada ciclo de refresco.
+- Ambas comparten el mismo `SOS_MAGNITUDE_THRESHOLD` de `AppConfig`.

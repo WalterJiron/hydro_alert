@@ -33,7 +33,7 @@ final class AlertsViewModelProvider
   AlertsViewModel create() => AlertsViewModel();
 }
 
-String _$alertsViewModelHash() => r'9797fceb572ec9f9076e5fa90cb2c89dd0ad17f3';
+String _$alertsViewModelHash() => r'72b6677ca1436c02767ffa4bc9c9f336a290efd3';
 
 abstract class _$AlertsViewModel extends $AsyncNotifier<List<SeismicEvent>> {
   FutureOr<List<SeismicEvent>> build();

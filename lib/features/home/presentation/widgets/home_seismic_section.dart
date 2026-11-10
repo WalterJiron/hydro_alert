@@ -49,8 +49,7 @@ class HomeSeismicSection extends ConsumerWidget {
               SeismicEventCard(
                 event: preview[index],
                 showDetails: true,
-                onTap: () =>
-                    showSeismicEventSheet(context, preview[index]),
+                onTap: () => showSeismicEventSheet(context, preview[index]),
               ),
             ],
           ],

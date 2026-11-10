@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/services/push_emergency_message.dart';
 import '../../core/services/realtime_service.dart';
+import '../../core/services/seismic_notification_service.dart';
 import '../../features/alerts/presentation/viewmodels/alerts_viewmodel.dart';
 import '../../features/emergency_sos/presentation/viewmodels/emergency_viewmodel.dart';
 import '../../features/emergency_sos/presentation/views/critical_alert_overlay_view.dart';
@@ -36,6 +37,8 @@ class _CriticalAlertHostState extends ConsumerState<CriticalAlertHost> {
       ref.read(emergencyViewModelProvider.notifier).triggerPush(message);
     });
     unawaited(notifications.initialize());
+
+    unawaited(ref.read(seismicNotificationServiceProvider).initialize());
 
     final realtime = ref.read(realtimeServiceProvider);
     _realtimeSubscription = realtime.notificationEvents.listen((message) {
